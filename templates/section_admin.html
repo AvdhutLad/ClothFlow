@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+
+{% block first_block %}
+<style>
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    width: 80%;
+
+    margin: 50px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.container h2 {
+    margin-top: 0;
+    color: #009CFF; /* Updated heading color */
+}
+
+form div {
+    margin-bottom: 10px;
+}
+
+form label {
+    display: block;
+    font-weight: bold;
+    color: #009CFF; /* Updated label color */
+}
+
+form input[type="text"],
+form textarea {
+    width: calc(100% - 16px); /* Adjusting for padding */
+    padding: 8px;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+}
+
+form textarea {
+    height: 100px;
+}
+
+form button {
+    width: 100%;
+    padding: 10px 20px;
+    background-color: #009CFF; /* Updated button color */
+    color: #fff;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+form button:hover {
+    background-color: #0077CC; /* Darker shade on hover */
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+    <!--alert start-->
+   {% if messages %}
+   {% for message in messages %}
+   <div class="alert alert alert-success" role="alert">
+      <i class="fa fa-exclamation-circle me-2"></i>{{ message }}
+   </div>
+   {% endfor %}
+   {% endif %}
+   <!--alert end-->
+    <h2>Add Section</h2>
+    <form action="store_section" method="POST" >
+            {% csrf_token %}
+        <div>
+            <label for="section-name">Section Name:</label>
+            <input type="text" id="section-name" name="section_name" required>
+        </div>
+        <div>
+            <label for="section-location">Location:</label>
+            <input type="text" id="section-location" name="location" required>
+        </div>
+        <div>
+            <label for="section-description">Description:</label>
+            <textarea id="section-description" name="description" required></textarea>
+        </div>
+        <button type="submit">Add Section</button>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var form = document.getElementById('section-form');
+
+    form.addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        var sectionName = document.getElementById('section-name').value;
+        var location = document.getElementById('section-location').value;
+        var description = document.getElementById('section-description').value;
+
+        // Here you can perform further actions like sending data to the server
+        // For simplicity, let's just log the values to console
+        console.log('Section Name:', sectionName);
+        console.log('Location:', location);
+        console.log('Description:', description);
+
+        // You can also reset the form after submission if needed
+        form.reset();
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,517 @@
+
+	<head>
+		<!-- Add your head content here -->
+		<meta charset="utf-8">
+		<title>ClothFlow </title>
+		<meta content="width=device-width, initial-scale=1.0" name="viewport">
+		<meta content="" name="keywords">
+		<meta content="" name="description">
+		<!-- Favicon -->
+		<link href="static/img/favicon.ico" rel="icon">
+		<!-- Google Web Fonts -->
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700&display=swap" rel="stylesheet">
+		<!-- Icon Font Stylesheet -->
+		<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+		<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+		<!-- Libraries Stylesheet -->
+		<link href="static/lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet">
+		<link href="static/lib/tempusdominus/css/tempusdominus-bootstrap-4.min.css" rel="stylesheet" />
+		<!-- Customized Bootstrap Stylesheet -->
+		<link href="static/css/bootstrap.min.css" rel="stylesheet">
+		<!-- Template Stylesheet -->
+		<link href="static/css/style.css" rel="stylesheet">
+	</head>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+  }
+
+  #container {
+    width: 80%;
+    margin: 20px auto;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+  }
+
+  h1 {
+    text-align: center;
+    color: #009CFF;
+  }
+
+  form {
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .form-group {
+    margin-bottom: 20px;
+  }
+
+  label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+  }
+
+  input[type="text"],
+  input[type="email"],
+  select,
+  textarea,
+  input[type="number"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+    font-size: 16px;
+  }
+
+  select {
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url('data:image/svg+xml;utf8,<svg fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill="#000000" d="M7.412 9.88l4.589 4.59L16.59 9.88a.667.667 0 01.947.946l-5.25 5.25a.667.667 0 01-.948 0l-5.25-5.25a.665.665 0 01.001-.946.666.666 0 01.947 0z"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    padding-right: 30px;
+  }
+
+  textarea {
+    resize: vertical;
+  }
+
+  .btn {
+    background-color: #45a049;
+    color: white;
+    padding: 14px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+  }
+
+  .btn:hover {
+    background-color: #45a049;
+  }
+
+  footer {
+    text-align: center;
+    margin-top: 20px;
+    color: #777;
+  }
+
+  .search-button {
+    background-color: #45a049;
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+  }
+
+  .search-button:hover {
+    background-color: #45a049;
+  }
+
+  .search-group {
+    display: flex;
+    align-items: center;
+  }
+
+  .search-button-container {
+    margin-left: 10px;
+  }
+</style>
+</head>
+<body>
+<!--alert start-->
+{% if messages %}
+{% for message in messages %}
+<div class="alert alert-{% if message.tags == 'error' %}danger{% else %}success{% endif %}" role="alert">
+   <i class="fa fa-exclamation-circle me-2"></i>{{ message }}
+</div>
+{% endfor %}
+{% endif %}
+<!--alert end-->
+
+<div id="container">
+  <h1>Return and Refund Form</h1>
+  <form id="returnForm" method="POST" action="store_return_and_refund">
+    {% csrf_token %}
+
+
+
+
+    <div class="search-group">
+      <div class="form-group" style="width: calc(90% - 20px);">
+        <label for="billNumber">Bill Number</label>
+        <input type="number" id="billNumber" name="billNumber" required>
+      </div>
+      <div class="search-button-container">
+        <button type="button" id="searchButton" class="search-button">Search</button>
+      </div>
+    </div>
+
+
+    <div class="form-group">
+      <label for="customerName">Customer Name</label>
+      <input type="text" id="customerName" name="customerName" value="{{ customer_name }}" required readonly>
+    </div>
+    <div class="form-group">
+      <label for="email">Email Address</label>
+      <input type="email" id="email" name="email" value="{{ email_address }}" required readonly>
+    </div>
+    <div class="form-group">
+      <label for="billAmount">Purchased Bill Amount</label>
+      <input type="text" id="billAmount" name="billAmount" value="{{ purchase_bill_amount }}" required readonly>
+    </div>
+    <div class="form-group">
+      <label for="purchasedDate">Purchased Date</label>
+      <input type="text" id="purchasedDate" name="purchasedDate" value="{{ purchase_date }}" required readonly>
+    </div>
+    <div class="form-group">
+      <label for="product">Product</label>
+
+      <select id="product" name="product" required>
+          <option value="" name="product">Select Product</option>
+          {% for item in invoice_items %}
+          <option value="{{ item.product_name }}">{{ item.product_name }} {{ item.quantity }} {{ item.amount }}</option>
+          {% endfor %}
+      </select>
+      <!--<select id="product" name="product" required>-->
+        <!--<option value="">Select Product</option>-->
+        <!--{% for item in invoice_items %}-->
+        <!--<option value="{{ item.product_name }} {{ item.quantity }} ">{{ item.product_name }}</option>-->
+        <!--{% endfor %}-->
+      <!--</select>-->
+    </div>
+
+    <div class="form-group">
+      <label for="quantity">Quantity</label>
+      <input type="number" id="quantity" name="quantity" style="width: 100%;" required>
+    </div>
+
+
+
+
+    <div class="form-group">
+      <label for="whatdoyouwanttodo">What do you want to do?</label>
+      <select id="whatdoyouwanttodo" name="whatdoyouwanttodo" required>
+        <option value="">Select Reason</option>
+        <option value="exchange">Exchange</option>
+        <option value="refund">Refund</option>
+      </select>
+    </div>
+    <div class="form-group" id="returnAmountField" style="display: none;">
+      <label for="returnAmount">Return Amount</label>
+      <input type="number" id="returnAmount" name="returnAmount" style="width: 100%;">
+    </div>
+
+    <div class="form-group">
+      <label for="reason">Reason</label>
+      <textarea id="reason" name="reason" rows="4" required></textarea>
+    </div>
+    <button type="submit" class="btn">Submit</button>
+  </form>
+</div>
+</body>
+
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+
+$(document).ready(function() {
+    $('#searchButton').click(function() {
+        var billNumber = $('#billNumber').val();
+        $.ajax({
+            url: '{% url "refund" %}',
+            method: 'POST',
+            data: {
+                'billNumber': billNumber,
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            },
+            dataType: 'json',
+            success: function(data) {
+                // Populate form fields with data received from the server
+                $('#customerName').val(data.customer_name);
+                $('#email').val(data.email_address);
+                $('#billAmount').val(data.purchase_bill_amount);
+                $('#purchasedDate').val(data.purchase_date);
+
+                // Populate product select options with both product name and quantity
+                var productSelect = $('#product');
+                productSelect.empty(); // Clear existing options
+                $.each(data.invoice_items, function(index, item) {
+                    var optionText = item.product_name + '  {Quantity: ' + item.quantity + ' ,  Amount: ' + item.amount + '}';
+                    productSelect.append($('<option></option>').val(item.product_name).text(optionText));
+                });
+            },
+            error: function() {
+                alert('Error: Invoice not found.');
+            }
+        });
+    });
+
+    // Show or hide Return Amount field based on the selected option
+    $('#whatdoyouwanttodo').change(function() {
+        if ($(this).val() === 'exchange') {
+            $('#returnAmountField').hide();
+        } else {
+            $('#returnAmountField').show();
+        }
+    });
+});
+
+</script>
+<!--<style>-->
+  <!--body {-->
+    <!--font-family: Arial, sans-serif;-->
+    <!--margin: 0;-->
+    <!--padding: 0;-->
+    <!--background-color: #f4f4f4;-->
+  <!--}-->
+
+  <!--#container {-->
+    <!--width: 80%;-->
+    <!--margin: 20px auto;-->
+    <!--background-color: #fff;-->
+    <!--border-radius: 10px;-->
+    <!--box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);-->
+    <!--padding: 20px;-->
+  <!--}-->
+
+  <!--h1 {-->
+    <!--text-align: center;-->
+    <!--color: #009CFF;-->
+  <!--}-->
+
+  <!--form {-->
+    <!--max-width: 600px;-->
+    <!--margin: 0 auto;-->
+  <!--}-->
+
+  <!--.form-group {-->
+    <!--margin-bottom: 20px;-->
+  <!--}-->
+
+  <!--label {-->
+    <!--display: block;-->
+    <!--font-weight: bold;-->
+    <!--margin-bottom: 5px;-->
+  <!--}-->
+
+  <!--input[type="text"],-->
+  <!--input[type="email"],-->
+  <!--select,-->
+  <!--textarea,-->
+  <!--input[type="number"] {-->
+    <!--width: 100%;-->
+    <!--padding: 10px;-->
+    <!--border: 1px solid #ccc;-->
+    <!--border-radius: 5px;-->
+    <!--box-sizing: border-box;-->
+    <!--font-size: 16px;-->
+  <!--}-->
+
+  <!--select {-->
+    <!--appearance: none;-->
+    <!-- -webkit-appearance: none;-->
+    <!--background-image: url('data:image/svg+xml;utf8,<svg fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill="#000000" d="M7.412 9.88l4.589 4.59L16.59 9.88a.667.667 0 01.947.946l-5.25 5.25a.667.667 0 01-.948 0l-5.25-5.25a.665.665 0 01.001-.946.666.666 0 01.947 0z"/></svg>');-->
+    <!--background-repeat: no-repeat;-->
+    <!--background-position: right 10px center;-->
+    <!--padding-right: 30px;-->
+  <!--}-->
+
+  <!--textarea {-->
+    <!--resize: vertical;-->
+  <!--}-->
+
+  <!--.btn {-->
+    <!--background-color: #45a049;-->
+    <!--color: white;-->
+    <!--padding: 14px 20px;-->
+    <!--border: none;-->
+    <!--border-radius: 5px;-->
+    <!--cursor: pointer;-->
+    <!--font-size: 16px;-->
+    <!--transition: background-color 0.3s;-->
+  <!--}-->
+
+  <!--.btn:hover {-->
+    <!--background-color: #45a049; -->
+  <!--}-->
+
+  <!--footer {-->
+    <!--text-align: center;-->
+    <!--margin-top: 20px;-->
+    <!--color: #777;-->
+  <!--}-->
+
+  <!--.search-button {-->
+    <!--background-color: #45a049;-->
+    <!--color: white;-->
+    <!--padding: 10px;-->
+    <!--border: none;-->
+    <!--border-radius: 10px;-->
+    <!--cursor: pointer;-->
+    <!--font-size: 16px;-->
+    <!--transition: background-color 0.3s;-->
+  <!--}-->
+
+  <!--.search-button:hover {-->
+    <!--background-color: #45a049;-->
+  <!--}-->
+
+  <!--.search-group {-->
+    <!--display: flex;-->
+    <!--align-items: center;-->
+  <!--}-->
+
+  <!--.search-button-container {-->
+    <!--margin-left: 10px;-->
+  <!--}-->
+<!--</style>-->
+<!--</head>-->
+<!--<body>-->
+<!--&lt;!&ndash;alert start&ndash;&gt;-->
+<!--{% if messages %}-->
+<!--{% for message in messages %}-->
+<!--<div class="alert alert-{% if message.tags == 'error' %}danger{% else %}success{% endif %}" role="alert">-->
+   <!--<i class="fa fa-exclamation-circle me-2"></i>{{ message }}-->
+<!--</div>-->
+<!--{% endfor %}-->
+<!--{% endif %}-->
+<!--&lt;!&ndash;alert end&ndash;&gt;-->
+
+<!--<div id="container">-->
+  <!--<h1>Return and Refund Form</h1>-->
+  <!--<form id="returnForm" method="POST" action="store_return_and_refund">-->
+    <!--{% csrf_token %}-->
+
+
+
+
+    <!--<div class="search-group">-->
+      <!--<div class="form-group" style="width: calc(90% - 20px);">-->
+        <!--<label for="billNumber">Bill Number</label>-->
+        <!--<input type="number" id="billNumber" name="billNumber" required>-->
+      <!--</div>-->
+      <!--<div class="search-button-container">-->
+        <!--<button type="button" id="searchButton" class="search-button">Search</button>-->
+      <!--</div>-->
+    <!--</div>-->
+
+
+    <!--<div class="form-group">-->
+      <!--<label for="customerName">Customer Name</label>-->
+      <!--<input type="text" id="customerName" name="customerName" value="{{ customer_name }}" required readonly>-->
+    <!--</div>-->
+    <!--<div class="form-group">-->
+      <!--<label for="email">Email Address</label>-->
+      <!--<input type="email" id="email" name="email" value="{{ email_address }}" required readonly>-->
+    <!--</div>-->
+    <!--<div class="form-group">-->
+      <!--<label for="billAmount">Purchased Bill Amount</label>-->
+      <!--<input type="text" id="billAmount" name="billAmount" value="{{ purchase_bill_amount }}" required readonly>-->
+    <!--</div>-->
+    <!--<div class="form-group">-->
+      <!--<label for="purchasedDate">Purchased Date</label>-->
+      <!--<input type="text" id="purchasedDate" name="purchasedDate" value="{{ purchase_date }}" required readonly>-->
+    <!--</div>-->
+    <!--<div class="form-group">-->
+      <!--<label for="product">Product</label>-->
+
+      <!--<select id="product" name="product" required>-->
+          <!--<option value="" name="product">Select Product</option>-->
+          <!--{% for item in invoice_items %}-->
+          <!--<option value="{{ item.product_name }}">{{ item.product_name }} {{ item.quantity }} {{ item.amount }}</option>-->
+          <!--{% endfor %}-->
+      <!--</select>-->
+
+      <!--&lt;!&ndash;<select id="product" name="product" required>&ndash;&gt;-->
+        <!--&lt;!&ndash;<option value="">Select Product</option>&ndash;&gt;-->
+        <!--&lt;!&ndash;{% for item in invoice_items %}&ndash;&gt;-->
+        <!--&lt;!&ndash;<option value="{{ item.product_name }} {{ item.quantity }} ">{{ item.product_name }}</option>&ndash;&gt;-->
+        <!--&lt;!&ndash;{% endfor %}&ndash;&gt;-->
+      <!--&lt;!&ndash;</select>&ndash;&gt;-->
+    <!--</div>-->
+    <!--<div class="form-group">-->
+      <!--<label for="quantity">Quantity</label>-->
+      <!--<input type="number" id="quantity" name="quantity" style="width: 100%;" required>-->
+    <!--</div>-->
+
+    <!--<div class="form-group">-->
+      <!--<label for="quantity">Return Amount</label>-->
+      <!--<input type="number" id="returnAmount" name="returnAmount" style="width: 100%;" required>-->
+    <!--</div>-->
+    <!--<div class="form-group">-->
+      <!--<label for="whatdoyouwanttodo">What do you want to do?</label>-->
+      <!--<select id="whatdoyouwanttodo" name="whatdoyouwanttodo" required>-->
+        <!--<option value="">Select Reason</option>-->
+        <!--<option value="exchange">Exchange</option>-->
+        <!--<option value="refund">Refund</option>-->
+      <!--</select>-->
+    <!--</div>-->
+    <!--<div class="form-group">-->
+      <!--<label for="reason">Reason</label>-->
+      <!--<textarea id="reason" name="reason" rows="4" required></textarea>-->
+    <!--</div>-->
+    <!--<button type="submit" class="btn">Submit</button>-->
+  <!--</form>-->
+<!--</div>-->
+<!--</body>-->
+
+
+
+<!--<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>-->
+<!--<script>-->
+
+<!--$(document).ready(function() {-->
+    <!--$('#searchButton').click(function() {-->
+        <!--var billNumber = $('#billNumber').val();-->
+        <!--$.ajax({-->
+            <!--url: '{% url "refund" %}',-->
+            <!--method: 'POST',-->
+            <!--data: {-->
+                <!--'billNumber': billNumber,-->
+                <!--'csrfmiddlewaretoken': '{{ csrf_token }}'-->
+            <!--},-->
+            <!--dataType: 'json',-->
+            <!--success: function(data) {-->
+                <!--// Populate form fields with data received from the server-->
+                <!--$('#customerName').val(data.customer_name);-->
+                <!--$('#email').val(data.email_address);-->
+                <!--$('#billAmount').val(data.purchase_bill_amount);-->
+                <!--$('#purchasedDate').val(data.purchase_date);-->
+
+                <!--// Populate product select options with both product name and quantity-->
+                <!--var productSelect = $('#product');-->
+                <!--productSelect.empty(); // Clear existing options-->
+                <!--$.each(data.invoice_items, function(index, item) {-->
+                    <!--var optionText = item.product_name + '  {Quantity: ' + item.quantity + ' ,  Amount: ' + item.amount + '}';-->
+                    <!--productSelect.append($('<option></option>').val(item.product_name).text(optionText));-->
+                <!--});-->
+            <!--},-->
+            <!--error: function() {-->
+                <!--alert('Error: Invoice not found.');-->
+            <!--}-->
+        <!--});-->
+    <!--});-->
+<!--});-->
+
+
+
+<!--</script>-->
+
+
+

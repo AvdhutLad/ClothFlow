@@ -1,0 +1,61 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Chart</title>
+    <!-- Include Chart.js -->
+     <!--<script src="static/lib/chart/chart.min.js"></script>-->
+<script src="{% static '/lib/chart/chart.min.js' %}"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <div class="container-fluid pt-4 px-4">
+    <div class="row g-4">
+    <canvas id="invoiceChart"></canvas>
+    </div>
+    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Parse data passed from Django view
+            var data = JSON.parse("{{ data|escapejs }}");
+            var dates = [];
+            var amounts = [];
+            data.forEach(function(item) {
+                dates.push(item.invoice_date);
+                amounts.push(item.total_amount);
+            });
+
+            var ctx = document.getElementById('invoiceChart').getContext('2d');
+    var chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: dates, // Use dates for y-axis
+        datasets: [{
+            label: ' Sales',
+            data: amounts, // Use amounts for x-axis
+            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+            borderColor: 'rgba(54, 162, 235, 1)',
+            borderWidth: 1
+        }]
+    },
+    options: {
+        scales: {
+            xAxes: [{
+                ticks: {
+                    beginAtZero: true
+                }
+            }]
+        }
+    }
+});
+
+        });
+    </script>
+</body>
+</html>
+
+

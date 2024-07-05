@@ -1,0 +1,271 @@
+{% extends 'base.html' %}
+
+{% block first_block %}
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 0;
+    }
+    .container {
+        max-width: 1000px;
+        margin: 20px auto;
+        padding: 20px;
+        background-color: #fff;
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+        color: #009CFF;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    .search-container {
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+    }
+    .search-container label {
+        font-weight: bold;
+        margin-right: 10px;
+    }
+    .search-container input[type="date"],
+    .search-container input[type="text"] {
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        width: 45%;
+    }
+    .search-container input[type="date"] {
+        width: 80%;
+    }
+    .search-btn, .save-btn {
+        border: none;
+        border-radius: 3px;
+        padding: 10px 20px 10px 20px;
+        cursor: pointer;
+        margin-left: 170px;
+    }
+    .search-btn {
+        background-color: #009CFF;
+        color: white;
+    }
+    .search-btn:hover {
+        background-color: #0075b2;
+    }
+    .save-btn {
+        background-color: #4CAF50;
+        color: white;
+    }
+    .save-btn:hover {
+        background-color: #45a049;
+    }
+    .date {
+        font-weight: bold;
+        color: #009CFF;
+        margin-bottom: 10px;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    th, td {
+        border: 1px solid #ddd;
+        padding: 10px;
+        text-align: left;
+    }
+    th {
+        background-color: #009CFF;
+        color: #fff;
+    }
+    .save-btn {
+        float: right;
+        margin-left: auto;
+    }
+    .present, .absent, .invalid {
+        font-weight: bold;
+    }
+    .present {
+        color: #009CFF;
+    }
+    .absent {
+        color: #ff4500;
+    }
+    .invalid {
+        color: #dc3545;
+    }
+</style>
+</head>
+<body>
+<div class="container">
+       <!--alert start-->
+   {% if messages %}
+   {% for message in messages %}
+   <div class="alert alert alert-success" role="alert">
+      <i class="fa fa-exclamation-circle me-2"></i>{{ message }}
+   </div>
+   {% endfor %}
+   {% endif %}
+   <!--alert end-->
+
+    <h1>Employee Attendance</h1>
+    <form id="attendanceForm" method="post" action="{% url 'save_attendance' %}">
+        {% csrf_token %}
+    <div class="search-container">
+        <div>
+            <label for="date">Date:</label>
+            <input type="date" id="date" name="date" value="{{ today_date }}" required>
+        </div>
+        <div>
+            <label for="empName">Employee Name:</label>
+            <input type="text" id="empName" name="empName" placeholder="Search by name...">
+        </div>
+        <button class="search-btn" onclick="search()">Search</button>
+    </div>
+    <div class="date">
+        <span id="currentDate">{{ today_date }}</span>
+    </div>
+
+
+
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Employee ID</th>
+                    <th>Employee Name</th>
+                    <th>Employee Role</th>
+                    <th>In Time</th>
+                    <th>Out Time</th>
+                    <th>Attendance</th>
+
+                </tr>
+            </thead>
+            <tbody id="employeeTableBody">
+                {% for staff in staff_members %}
+
+                <input type="hidden"  name="staff_id" value="{{ staff.staff_id }}">
+                <tr>
+                    <td>{{ staff.staff_id }}</td>
+                    <td>{{ staff.first_name }} {{ staff.last_name }}</td>
+                    {% if staff.role == 1%}
+                    <td>STAFF</td>
+                    {% else %}
+                    <td>HR</td>
+                    {% endif %}
+                    <td><input type="time" name="inTime_{{ staff.staff_id }}" id="inTime_{{ staff.staff_id }}" required></td>
+                    <td><input type="time" name="outTime_{{ staff.staff_id }}" id="outTime_{{ staff.staff_id }}" required></td>
+                    <td>
+                        <label>
+                            <input type="radio" name="attendance_{{ staff.staff_id }}" value="present" required>
+                            Present
+                        </label><br>
+                        <label>
+                            <input type="radio" name="attendance_{{ staff.staff_id }}" value="absent"  required>
+                            Absent
+                        </label>
+
+                    </td>
+                    <!--<td id="status_{{ staff.staff_id }}"></td>-->
+                </tr>
+                {% endfor %}
+            </tbody>
+            <button type="submit" class="save-btn">Save</button>
+        </table>
+
+
+    </form>
+</div>
+
+
+<script>
+//Set current date value
+    document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+    // Store the last selected attendance radio button
+    let lastSelectedAttendance = null;
+
+    // Function to update status based on the selected attendance
+    function updateStatus(index) {
+        // Get the selected radio button
+        const selectedAttendance = document.querySelector(`input[name="attendance_${index}"]:checked`);
+
+        // Get the status cell
+        const statusCell = document.getElementById(`status_${index}`);
+
+        // If a different radio button was previously selected, clear its status cell
+        if (lastSelectedAttendance && lastSelectedAttendance !== selectedAttendance) {
+            lastSelectedAttendance.checked = false;
+            statusCell.innerText = "";
+        }
+
+        // Update the status cell based on the selected attendance
+        if (selectedAttendance.value === "present") {
+            statusCell.innerText = "Present";
+        } else if (selectedAttendance.value === "absent") {
+            statusCell.innerText = "Absent";
+        }
+
+        // Update the last selected attendance
+        lastSelectedAttendance = selectedAttendance;
+    }
+
+
+
+    // Function to calculate status based on in time and out time
+    function calculateStatus(formData) {
+        Object.keys(formData).forEach(key => {
+            if (key.startsWith('inTime')) {
+                var employeeId = key.split('_')[1];
+                var inTime = formData[key];
+                var outTime = formData['outTime_' + employeeId];
+                var statusCell = document.getElementById('status_' + employeeId);
+
+                if (inTime && outTime) {
+                    var inTimeHours = parseInt(inTime.split(':')[0]);
+                    var inTimeMinutes = parseInt(inTime.split(':')[1]);
+                    var outTimeHours = parseInt(outTime.split(':')[0]);
+                    var outTimeMinutes = parseInt(outTime.split(':')[1]);
+
+                    if (outTimeHours < inTimeHours || (outTimeHours === inTimeHours && outTimeMinutes < inTimeMinutes)) {
+                        statusCell.textContent = 'Invalid Time';
+                        statusCell.className = 'invalid';
+                    } else {
+                        statusCell.textContent = 'Valid Time';
+                        statusCell.className = 'present';
+                    }
+                } else {
+                    statusCell.textContent = 'N/A';
+                    statusCell.className = '';
+                }
+            }
+        });
+    }
+
+    // Function to search by name
+    function search() {
+        var empName = document.getElementById('empName').value.trim().toLowerCase(); // Get the employee name from the input field
+        var rows = document.querySelectorAll('tbody tr'); // Get all table rows
+
+        // Loop through each row to search for the employee name
+        rows.forEach(row => {
+            var nameCell = row.querySelector('.emp-name'); // Get the cell containing the employee name
+            if (nameCell) {
+                var name = nameCell.textContent.trim().toLowerCase(); // Get the employee name from the cell
+
+                // If the employee name matches the search query, show the row; otherwise, hide it
+                if (name.includes(empName)) {
+                    row.style.display = ''; // Show the row
+                } else {
+                    row.style.display = 'none'; // Hide the row
+                }
+            }
+        });
+    }
+</script>
+
+
+
+
+{% endblock %}

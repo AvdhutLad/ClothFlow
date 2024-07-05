@@ -1,0 +1,64 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Summary</title>
+    <!-- Include Chart.js -->
+    <script src="{% static '/lib/chart/chart.min.js' %}"></script>
+</head>
+<body>
+    <div class="container-fluid pt-4 px-4">
+        <div class="row g-4">
+            <canvas id="attendanceChart"></canvas>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Parse data passed from Django view
+            var data = JSON.parse("{{ data|escapejs }}");
+
+            // Extract first names, last names, and attendance percentages
+            var staffNames = [];
+            var attendancePercentages = [];
+            data.forEach(function(item) {
+                staffNames.push(item.staff__first_name + " " + item.staff__last_name);
+                attendancePercentages.push(parseFloat(item.attendance_percentage).toFixed(2));
+            });
+
+            // Get canvas context
+            var ctx = document.getElementById('attendanceChart').getContext('2d');
+
+            // Create chart
+            var chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: staffNames,
+                    datasets: [{
+                        label: 'Attendance Percentage',
+                        data: attendancePercentages,
+                        backgroundColor: 'rgba(54, 162, 235, 0.5)', // Blue color
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero: true,
+                                max: 100,
+                                callback: function(value) {
+                                    return value.toString() + '%'; // Convert to string and add '%' symbol
+                                }
+                            }
+                        }]
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

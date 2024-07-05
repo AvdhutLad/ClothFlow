@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% block first_block %}
+
+<br><br>
+<div class="col-12">
+
+<style>
+    /* Styling for table header */
+    table th {
+        background-color: black;
+        color: black;
+        font-weight: bold;
+    }
+
+    /* Styling for odd rows */
+    table tbody tr:nth-child(odd) {
+        background-color: #f8f9fa;
+    }
+
+    /* Styling for even rows */
+    table tbody tr:nth-child(even) {
+        background-color: #ffffff;
+    }
+
+    /* Styling for table cells */
+    table td {
+        padding: 8px;
+        border: 1px solid #dee2e6;
+    }
+</style>
+
+<div class="bg-light rounded h-100 p-4">
+    <h6 class="mb-4">Product Table</h6>
+    <a href="{% url 'download_excel' %}" class="btn btn-primary">Download Excel</a>
+
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>SR. NO</th>
+                    <th>Product Name</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th>Purchase Date</th>
+                    <th>Supplier Name</th>
+                    <th>Added By</th>
+                    <th>Updated By</th>
+                    <th>Update Date Time</th>
+                    <th>Update Note</th>
+                    <th>Brand</th>
+                    <th>Category</th>
+                    <th>Section</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for product in products %}
+                <tr>
+                    <th scope="row">{{ forloop.counter }}</th>
+                    <td>{{ product.product_name }}</td>
+                    <td>{{ product.price }}</td>
+                    <td>{{ product.quantity }}</td>
+                    <td>{{ product.purchase_date }}</td>
+                    <td>{{ product.supplier_name }}</td>
+                    <td>{{ product.added_by }}</td>
+                    <td>{{ product.updated_by }}</td>
+                    <td>{{ product.update_date_time }}</td>
+                    <td>{{ product.update_note }}</td>
+                    <td>{{ product.brand.brand_name }}</td>
+                    <td>{{ product.category.category_name }}</td>
+                    <td>{{ product.section.section_name }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

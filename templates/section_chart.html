@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Section Chart</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <canvas id="categoryChart"></canvas>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const data = {{ data|safe }};
+            const sectionNames = data.map(item => item.section_name);
+            const categoryCounts = data.map(item => item.num_categories);
+
+            const ctx = document.getElementById('categoryChart').getContext('2d');
+            const chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: sectionNames,
+                    datasets: [{
+                        label: 'Number of Categories',
+                        data: categoryCounts,
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

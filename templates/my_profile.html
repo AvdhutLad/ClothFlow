@@ -1,0 +1,300 @@
+{% extends 'base.html' %}
+
+{% if user.is_authenticated %}
+    {% if user.staff.role == 1 %}
+        <!-- Staff Template Start -->
+        {% block first_block %}
+            <!-- View/Edit Details Start -->
+            <div class="container-xl px-4 mt-4">
+                <!-- Content goes here -->
+            </div>
+            <!-- View/Edit Details End -->
+        {% endblock %}
+        <!-- Staff Template End -->
+
+
+    {% elif user.staff.role == 2 %}
+        <!-- HR Template Start -->
+        {% block second_block %}
+            <!-- View/Edit Details Start -->
+            <div class="container-xl px-4 mt-4">
+   <nav class="nav nav-borders">
+      <a class="nav-link active ms-0" href="https://www.bootdey.com/snippets/view/bs5-edit-profile-account-details" target="__blank">Profile</a>
+   </nav>
+   <hr class="mt-0 mb-4">
+   <!--alert start-->
+   {% if messages %}
+   {% for message in messages %}
+   <div class="alert alert alert-success role="alert">
+      <i class="fa fa-exclamation-circle me-2"></i>{{ message }}
+   </div>
+   {% endfor %}
+   {% endif %}
+   <!--alert end-->
+
+
+
+<style type="text/css">
+   body{margin-top:20px;
+   background-color:#f2f6fc;
+   color:#69707a;
+   }
+   .img-account-profile {
+   height: 10rem;
+   }
+   .rounded-circle {
+   border-radius: 50% !important;
+   }
+   .card {
+   box-shadow: 0 0.15rem 1.75rem 0 rgb(33 40 50 / 15%);
+   }
+   .card .card-header {
+   font-weight: 500;
+   }
+   .card-header:first-child {
+   border-radius: 0.35rem 0.35rem 0 0;
+   }
+   .card-header {
+   padding: 1rem 1.35rem;
+   margin-bottom: 0;
+   background-color: rgba(33, 40, 50, 0.03);
+   border-bottom: 1px solid rgba(33, 40, 50, 0.125);
+   }
+   .form-control, .dataTable-input {
+   display: block;
+   width: 100%;
+   padding: 0.875rem 1.125rem;
+   font-size: 0.875rem;
+   font-weight: 400;
+   line-height: 1;
+   color: #69707a;
+   background-color: #fff;
+   background-clip: padding-box;
+   border: 1px solid #c5ccd6;
+   -webkit-appearance: none;
+   -moz-appearance: none;
+   appearance: none;
+   border-radius: 0.35rem;
+   transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+   }
+   .nav-borders .nav-link.active {
+   color: #0061f2;
+   border-bottom-color: #0061f2;
+   }
+   .nav-borders .nav-link {
+   color: #69707a;
+   border-bottom-width: 0.125rem;
+   border-bottom-style: solid;
+   border-bottom-color: transparent;
+   padding-top: 0.5rem;
+   padding-bottom: 0.5rem;
+   padding-left: 0;
+   padding-right: 0;
+   margin-left: 1rem;
+   margin-right: 1rem;
+   }
+</style>
+
+
+<!-- View/Edit Details End -->
+        {% endblock %}
+        <!-- HR Template End -->
+
+
+{% elif user.username == "admin@gmail.com" %}
+        <!-- Admin Template Start -->
+        {% block third_block %}
+            <!-- View Details Start -->
+            <div class="container-xl px-4 mt-4">
+   <hr class="mt-0 mb-4">
+   <!--&lt;!&ndash;alert end&ndash;&gt;-->
+   <!--{% if messages %}-->
+   <!--{% for message in messages %}-->
+   <!--<div class="alert alert alert-danger role="alert">-->
+      <!--<i class="fa fa-exclamation-circle me-2"></i>{{ message }}-->
+   <!--</div>-->
+   <!--{% endfor %}-->
+   <!--{% endif %}-->
+   <!--&lt;!&ndash;alert end&ndash;&gt;-->
+   <div class="row">
+      <div class="col-xl-4">
+         <div class="card mb-4 mb-xl-0">
+            <div class="card-header">Profile Picture</div>
+            <div class="card-body text-center">
+               {% if staff_member.profile_image == null%}
+                    <img class="img-account-profile rounded-circle mb-2" src="http://bootdey.com/img/Content/avatar/avatar1.png" alt>
+                    {% else %}
+
+                    <img class="img-account-profile rounded-circle mb-2" src="static/{{staff_member.profile_image}}" height="200px" width="200px" alt>
+
+                    {% endif %}
+
+
+               <div class="small font-italic text-muted mb-4">JPG or PNG no larger than  MB </div>
+               <!--<button class="btn btn-primary" type="button">Upload new image</button>-->
+               <!--file upload start-->
+               <form action="{% url 'upload_image' %}" method="post" enctype="multipart/form-data">
+                   {% csrf_token %}
+                   <input type="hidden" name="staff_id" value="{{ staff_member.staff_id }}">
+                   <input type="file" name="image" id="fileInput" style="display: none;" accept="image/*">
+                    <button class="btn btn-primary" type="button" onclick="document.getElementById('fileInput').click();">Upload new image</button>
+                    <span id="fileName"></span>
+                    <button class="btn btn-success" type="submit">Save Image</button>
+                </form>
+                <script>
+                    document.getElementById('fileInput').addEventListener('change', function() {
+                        const file = this.files[0];
+                        const fileNameSpan = document.getElementById('fileName');
+                        if (file) {
+                            fileNameSpan.textContent = file.name;
+                        } else {
+                            fileNameSpan.textContent = '';
+                        }
+                    });
+                </script>
+
+
+
+               <!--file upload end -->
+            </div>
+         </div>
+      </div>
+      <div class="col-xl-8">
+         <div class="card mb-4">
+            <div class="card-header">My Profile</div>
+            <div class="card-body">
+               <form action="changes_my_profile" method="POST">
+                  {% csrf_token %}
+                  <!--<div class="mb-3">-->
+                  <!--<label class="small mb-1" for="inputUsername">Username  </label>-->
+                  <!--<input class="form-control" id="inputUsername" type="text" placeholder="Enter your username" value="{{ staff_member.email }}">-->
+                  <!--</div>-->
+                  <input type="hidden" name="staff_id" value="{{ staff_member.staff_id }}">
+                  <div class="row gx-3 mb-3">
+                     <div class="col-md-6">
+                        <label class="small mb-1" for="inputFirstName">First name</label>
+                        <input class="form-control" id="inputFirstName" type="text" placeholder="Enter your first name" value="{{ staff_member.first_name }}" name="first_name" required>
+                     </div>
+                     <div class="col-md-6">
+                        <label class="small mb-1" for="inputLastName">Middle name</label>
+                        <input class="form-control" id="inputLastName" type="text" placeholder="Enter your Middle name" value="{{ staff_member.middle_name }}" name="middle_name" required>
+                     </div>
+                     <div class="col-md-6">
+                        <label class="small mb-1" for="inputLastName">Last name</label>
+                        <input class="form-control" id="inputLastName" type="text" placeholder="Enter your last name" value="{{ staff_member.last_name }}" name="last_name" required>
+                     </div>
+                     {% if staff_member.role == 1%}
+                     <div class="col-md-6">
+                        <label class="small mb-1" for="inputLastName">Role</label>
+                        <input class="form-control" id="inputLastName" type="text" placeholder="Enter your Role" value="STAFF" name="role" required>
+                     </div>
+                     {% else %}
+                     <div class="col-md-6">
+                        <label class="small mb-1" for="inputLastName">Role</label>
+                        <input class="form-control" id="inputLastName" type="text" placeholder="Enter Role" value="HR" name="role" required>
+                     </div>
+                     {% endif %}
+                  </div>
+                  <div class="row gx-3 mb-3">
+                     <div class="col-md-6">
+                        <label class="small mb-1" for="inputOrgName">Education </label>
+                        <input class="form-control" id="inputOrgName" type="text" placeholder="Enter your Education " value="{{ staff_member.education }}" name="education" required>
+                     </div>
+                     <div class="col-md-6">
+                        <label class="small mb-1" for="inputLocation">Address</label>
+                        <input class="form-control" id="inputLocation" type="text" placeholder="Enter your Address" value="{{ staff_member.address }}" name="address" required>
+                     </div>
+                  </div>
+                  <div class="mb-3">
+                     <label class="small mb-1" for="inputEmailAddress">Email address</label>
+                     <input class="form-control" id="inputEmailAddress" type="email" placeholder="Enter your email address" value="{{ staff_member.email }}" name="email" required>
+                  </div>
+                  <div class="row gx-3 mb-3">
+                     <div class="col-md-6">
+                        <label class="small mb-1" for="inputPhone">Phone number</label>
+                        <input class="form-control" id="inputPhone" type="tel" placeholder="Enter your phone number" value="{{ staff_member.phone }}" maxlength="10" name="phone" required>
+                     </div>
+                     <div class="col-md-6">
+                        <label class="small mb-1" for="inputBirthday">Date of Joining </label>
+                        <input class="form-control" id="inputBirthday" type="text"  value="{{ staff_member.user.date_joined|date:'Y-m-d' }}" readonly>
+                     </div>
+                  </div>
+                  <button class="btn btn-primary" type="submit">Save changes</button>
+               </form>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>
+<!--view details is end -->
+<style type="text/css">
+   body{margin-top:20px;
+   background-color:#f2f6fc;
+   color:#69707a;
+   }
+   .img-account-profile {
+   height: 10rem;
+   }
+   .rounded-circle {
+   border-radius: 50% !important;
+   }
+   .card {
+   box-shadow: 0 0.15rem 1.75rem 0 rgb(33 40 50 / 15%);
+   }
+   .card .card-header {
+   font-weight: 500;
+   }
+   .card-header:first-child {
+   border-radius: 0.35rem 0.35rem 0 0;
+   }
+   .card-header {
+   padding: 1rem 1.35rem;
+   margin-bottom: 0;
+   background-color: rgba(33, 40, 50, 0.03);
+   border-bottom: 1px solid rgba(33, 40, 50, 0.125);
+   }
+   .form-control, .dataTable-input {
+   display: block;
+   width: 100%;
+   padding: 0.875rem 1.125rem;
+   font-size: 0.875rem;
+   font-weight: 400;
+   line-height: 1;
+   color: #69707a;
+   background-color: #fff;
+   background-clip: padding-box;
+   border: 1px solid #c5ccd6;
+   -webkit-appearance: none;
+   -moz-appearance: none;
+   appearance: none;
+   border-radius: 0.35rem;
+   transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+   }
+   .nav-borders .nav-link.active {
+   color: #0061f2;
+   border-bottom-color: #0061f2;
+   }
+   .nav-borders .nav-link {
+   color: #69707a;
+   border-bottom-width: 0.125rem;
+   border-bottom-style: solid;
+   border-bottom-color: transparent;
+   padding-top: 0.5rem;
+   padding-bottom: 0.5rem;
+   padding-left: 0;
+   padding-right: 0;
+   margin-left: 1rem;
+   margin-right: 1rem;
+   }
+</style>
+
+
+<!-- View Details End -->
+        {% endblock %}
+        <!-- Admin Template End -->
+    {% endif %}
+{% else %}
+    <!-- Default Template Start -->
+    <h1>Default template in index page if user is not admin, hr, staff</h1>
+    <!-- Add your default content here -->
+{% endif %}

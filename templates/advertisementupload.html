@@ -1,0 +1,179 @@
+{% extends 'base.html' %}
+{% block first_block %}
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f5f5f5;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 950px;
+      margin: 50px auto;
+      background-color: #fff;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      text-align: center;
+      color: #009CFF;
+    }
+
+    label {
+      font-weight: bold;
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    input[type="text"],
+    input[type="date"],
+    textarea,
+    input[type="file"] {
+      width: calc(100% - 22px);
+      padding: 10px;
+      margin-bottom: 20px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      box-sizing: border-box;
+    }
+
+    input[type="file"] {
+      border: 2px solid #009CFF;
+      background-color: #f5f5f5;
+      color: #009CFF;
+    }
+
+    input[type="file"]::placeholder {
+      color: #009CFF;
+    }
+
+    .upload-btn {
+      display: block;
+      margin-top: 10px;
+      padding: 8px 20px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .upload-btn:hover {
+      background-color: #45a049;
+    }
+
+    .word-limit {
+      color: #888;
+      font-size: 12px;
+      text-align: right;
+    }
+
+    button[type="submit"] {
+      padding: 10px 20px;
+      background-color: #009CFF;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button[type="submit"]:hover {
+      background-color: #0082e6;
+    }
+
+    .error {
+      color: #ff0000;
+      font-size: 14px;
+      margin-top: 5px;
+    }
+  </style>
+</head>
+<body>
+<!--alert start-->
+{% if messages %}
+{% for message in messages %}
+<div class="alert alert-{% if message.tags == 'error' %}danger{% else %}success{% endif %}" role="alert">
+   <i class="fa fa-exclamation-circle me-2"></i>{{ message }}
+</div>
+{% endfor %}
+{% endif %}
+<!--alert end-->
+  <div class="container">
+    <h1>Upload Advertisement</h1>
+    <form action="uploadadvertisement" method="POST" enctype="multipart/form-data">
+       {% csrf_token %}
+      <label for="title">Advertisement Title:</label>
+      <input type="text" id="title" name="title" required maxlength="50">
+
+      <label for="startDate">Start Date:</label>
+      <input type="date" id="startDate" name="startDate" required>
+
+      <label for="endDate">End Date:</label>
+      <input type="date" id="endDate" name="endDate" required>
+
+      <label for="poster">Upload Poster (Image/Video):</label>
+      <input type="file" id="poster" name="image" accept="image/*, video/*" required>
+      <span class="error" id="posterError"></span>
+
+      <label for="description">Description:</label>
+      <textarea id="description" name="description" required maxlength="200"></textarea>
+      <div class="word-limit">
+        <span id="descriptionWordCount">0</span>/200
+      </div>
+
+      <label for="terms">Terms & Conditions:</label>
+      <textarea id="terms" name="terms" required maxlength="500"></textarea>
+      <div class="word-limit">
+        <span id="termsWordCount">0</span>/500
+      </div>
+
+      <button type="submit">Submit</button>
+    </form>
+  </div>
+
+  <script>
+    document.getElementById('poster').addEventListener('change', function () {
+      var file = this.files[0];
+      var posterError = document.getElementById('posterError');
+      var allowedExtensions = /(\.jpg|\.jpeg|\.png|\.gif|\.mp4|\.mov|\.avi)$/i;
+
+      if (!allowedExtensions.exec(file.name)) {
+        posterError.innerText = 'Only JPG, JPEG, PNG, GIF, MP4, MOV, or AVI files are allowed!';
+        this.value = '';
+        return false;
+      } else {
+        posterError.innerText = '';
+      }
+    });
+
+    // Word count limit for description
+    document.getElementById('description').addEventListener('input', function () {
+      var maxLength = 200;
+      var currentLength = this.value.length;
+      document.getElementById('descriptionWordCount').innerText = currentLength;
+      if (currentLength >= maxLength) {
+        this.value = this.value.substring(0, maxLength);
+        document.getElementById('descriptionWordCount').innerText = maxLength;
+      }
+    });
+
+    // Word count limit for terms & conditions
+    document.getElementById('terms').addEventListener('input', function () {
+      var maxLength = 500;
+      var currentLength = this.value.length;
+      document.getElementById('termsWordCount').innerText = currentLength;
+      if (currentLength >= maxLength) {
+        this.value = this.value.substring(0, maxLength);
+        document.getElementById('termsWordCount').innerText = maxLength;
+      }
+    });
+  </script>
+</body>
+
+{% endblock %}
+

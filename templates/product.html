@@ -1,0 +1,168 @@
+{% extends 'base.html' %}
+
+{% block first_block %}
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f8f9fa;
+        margin: 0;
+        padding: 0;
+    }
+    .container {
+        max-width: 800px;
+        margin: 20px auto;
+        background-color: #fff;
+        border-radius: 10px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        padding: 30px;
+    }
+    h2 {
+        font-size: 24px;
+        color: #333;
+        margin-bottom: 20px;
+        border-bottom: 2px solid #007bff;
+        padding-bottom: 10px;
+    }
+    .form-section {
+        margin-bottom: 30px;
+    }
+    .form-group {
+        margin-bottom: 20px;
+    }
+    label {
+        display: block;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+    input[type="text"],
+    input[type="number"],
+    select,
+    input[type="date"] {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        box-sizing: border-box;
+    }
+    select {
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23333"><path d="M7 10l5 5 5-5z" /></svg>');
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        background-size: 12px;
+    }
+    .date-field {
+        position: relative;
+    }
+    .date-field input[type="date"]::-webkit-calendar-picker-indicator {
+        background: transparent;
+        bottom: 0;
+        color: transparent;
+        cursor: pointer;
+        height: auto;
+        left: 0;
+        position: absolute;
+        right: 0;
+        top: 0;
+        width: auto;
+    }
+    button {
+        padding: 15px 20px;
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        display: block;
+        width: 100%;
+        font-size: 16px;
+        transition: background-color 0.3s ease;
+    }
+    button:hover {
+        background-color: #0056b3;
+    }
+</style>
+</head>
+<body>
+
+<form action="store_product" method="POST">
+
+    {% csrf_token %}
+<div class="container">
+    <h2>Add Product</h2>
+    <!--alert start-->
+                    {% if messages %}
+                    {% for message in messages %}
+                    <div class="alert alert alert-success" role="alert">
+                        <i class="fa fa-exclamation-circle me-2"></i>{{ message }}
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+    <!--alert end-->
+    <div class="form-section">
+        <h3 style="color: #007bff; font-size: 20px;">Product Information</h3>
+        <div class="form-group">
+            <label for="productName">Product Name</label>
+            <input type="text" id="productName" placeholder="Enter Product Name" name="product_name" required>
+        </div>
+
+        <div class="form-group">
+            <label for="section">Section</label>
+            <select id="section" name="section" required>
+                <option value="">Select Section</option>
+                {% for section_detail in section_details %}
+                <option value="{{ section_detail.section_id }}">{{ section_detail.section_name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="category">Category</label>
+
+            <select id="category" name="category" required>
+            <option value="">Select Category</option>
+            {% for category_detail in category_details %}
+            <option value="{{ category_detail.category_id }}">{{ category_detail.category_name }}</option>
+            {% endfor %}
+        </select>
+
+        </div>
+
+        <div class="form-group">
+            <label for="brand">Brand Name</label>
+            <select id="brand" name="brand" required>
+            <option value="">Select Brand</option>
+            {% for brand_detail in brand_details %}
+            <option value="{{ brand_detail.brand_id }}">{{ brand_detail.brand_name }}</option>
+            {% endfor %}
+        </select>
+
+        </div>
+    </div>
+    <div class="form-section">
+        <h3 style="color: #007bff; font-size: 20px;">Purchase Details</h3>
+        <div class="form-group">
+            <label for="price">Price</label>
+            <input type="number" id="price" placeholder="Enter Price" name="price" required>
+        </div>
+        <div class="form-group">
+            <label for="quantity">Quantity</label>
+            <input type="number" id="quantity" placeholder="Enter Quantity" name="quantity" required>
+        </div>
+        <div class="form-group date-field">
+            <label for="purchaseDate">Purchase Date</label>
+            <input type="date" id="purchaseDate" name="purchase_date" required>
+        </div>
+    </div>
+    <div class="form-section">
+        <h3 style="color: #007bff; font-size: 20px;">Supplier Information</h3>
+        <div class="form-group">
+            <label for="supplierName">Supplier Name</label>
+            <input type="text" id="supplierName" placeholder="Enter Supplier Name" name="supplier_name" required>
+        </div>
+    </div>
+    <button type="submit">Add Product</button>
+</div>
+</form>
+{% endblock %}

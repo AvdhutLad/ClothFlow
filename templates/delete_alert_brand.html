@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block first_block %}
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+    }
+    .warning-container {
+        text-align: center;
+        background-color: #fff;
+        padding: 250px 50px 250px 50px;
+        border-radius: 10px;
+        box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.2);
+    }
+    .warning-message {
+        margin-bottom: 20px;
+        color: #000000;
+    }
+    .button-container {
+        display: flex;
+        justify-content: center;
+        border:none;
+    }
+    .button-container a,
+    .button-container button {
+        display: inline-block;
+        text-decoration: none;
+        padding: 10px 20px;
+        margin: 0 10px;
+        border-radius: 5px;
+        color: #fff;
+        border:none;
+    }
+    .cancel-button,
+    .confirm-button {
+        background-color: #009CFF;
+    }
+</style>
+</head>
+<br><br>
+<div class="warning-container">
+    <div class="warning-message">
+        Are you sure you want to delete?
+    </div>
+    <div class="button-container">
+        <a href="view_category" class="cancel-button">Cancel</a>
+        <form action="delete_brand" method="POST">
+             {% csrf_token %}
+            <input type="hidden"  name="brand_id" value="{{ brand_details.brand_id }}">
+            <button type="submit" class="confirm-button">Confirm</button>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

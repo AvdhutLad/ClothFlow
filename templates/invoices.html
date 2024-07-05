@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% block first_block %}
+<br><br>
+<div class="col-12">
+                        <div class="bg-light rounded h-100 p-4">
+                            <h6 class="mb-4">Bills List</h6>
+
+
+
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Invoice ID</th>
+                                            <th scope="col">Bill Date</th>
+                                            <th scope="col">Final Amount </th>
+                                             <th scope="col">Staff Name</th>
+                                            <th scope="col">Customer Name</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for invoice in invoice %}
+                                        <tr>
+                                            <th scope="row">{{ invoice.invoice_id }}</th>
+                                            <td>{{ invoice.invoice_date }}</td>
+                                            <td>{{ invoice.final_amount }}</td>
+                                            <td>{{ invoice.staff.first_name }} {{ invoice.staff.last_name }}</td>
+                                            <td>{{ invoice.customer.customer_name }}</td>
+
+                                        </tr>
+                                    {% endfor %}
+
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+
+{% endblock %}
+
+
+
+<!--<!DOCTYPE html>-->
+<!--<html lang="en">-->
+<!--<head>-->
+    <!--<meta charset="UTF-8">-->
+    <!--<meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+    <!--<title>User Logs</title>-->
+<!--</head>-->
+<!--<body>-->
+    <!--<h1>User Logs</h1>-->
+    <!--<table>-->
+        <!--<thead>-->
+            <!--<tr>-->
+                <!--<th>Action Time</th>-->
+                <!--<th>User</th>-->
+                <!--<th>Action</th>-->
+                <!--<th>Object</th>-->
+            <!--</tr>-->
+        <!--</thead>-->
+        <!--<tbody>-->
+            <!--{% for log in user_logs %}-->
+            <!--<tr>-->
+                <!--<td>{{ log.action_time }}</td>-->
+                <!--<td>{{ log.user }}</td>-->
+                <!--<td>{{ log.get_action_display }}</td>-->
+                <!--<td>{{ log.object_repr }}</td>-->
+            <!--</tr>-->
+            <!--{% endfor %}-->
+        <!--</tbody>-->
+    <!--</table>-->
+<!--</body>-->
+<!--</html>-->

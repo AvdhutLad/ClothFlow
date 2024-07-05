@@ -1,0 +1,2209 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block first_block %}
+		          <!-- Sale & Revenue Start -->
+            <div class="container-fluid pt-4 px-4">
+               <div class="row g-4">
+                  <div class="col-sm-6 col-xl-3">
+                     <div class="bg-light rounded d-flex align-items-center justify-content-between p-4">
+                        <i class="fa fa-chart-line fa-3x text-primary"></i>
+                        <div class="ms-3">
+                           <p class="mb-2">Today Sale</p>
+                           <h6 class="mb-0">₹ {{today_sales}}</h6>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="col-sm-6 col-xl-3">
+                     <div class="bg-light rounded d-flex align-items-center justify-content-between p-4">
+                        <i class="fa fa-chart-bar fa-3x text-primary"></i>
+                        <div class="ms-3">
+                           <p class="mb-2">Total Sale</p>
+                           <h6 class="mb-0">₹ {{total_sales}}</h6>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="col-sm-6 col-xl-3">
+                     <div class="bg-light rounded d-flex align-items-center justify-content-between p-4">
+                        <i class="fa fa-chart-area fa-3x text-primary"></i>
+                        <div class="ms-3">
+                           <p class="mb-2">Today Revenue</p>
+                           <h6 class="mb-0">₹ {{today_sales}}</h6>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="col-sm-6 col-xl-3">
+                     <div class="bg-light rounded d-flex align-items-center justify-content-between p-4">
+                        <i class="fa fa-chart-pie fa-3x text-primary"></i>
+                        <div class="ms-3">
+                           <p class="mb-2">Total Revenue</p>
+                           <h6 class="mb-0">₹ {{total_sales}}</h6>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+
+
+
+
+
+{% if user.is_superuser %}
+
+
+<script src="{% static '/lib/chart/chart.min.js' %}"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<div class="container-fluid pt-4 px-4">
+    <div class="row g-4">
+            <div class="col-sm-12 col-xl-6">
+                <div class="bg-light rounded h-100 p-4">
+                    <h6 class="mb-4" id="currentMonth">Sales:</h6>
+
+                        <canvas id="invoiceChart"></canvas>
+                </div>
+            </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Parse data passed from Django view
+            var data = JSON.parse("{{ data|escapejs }}");
+            var dates = [];
+            var amounts = [];
+            data.forEach(function(item) {
+                dates.push(item.invoice_date);
+                amounts.push(item.total_amount);
+            });
+
+            var ctx = document.getElementById('invoiceChart').getContext('2d');
+    var chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: dates, // Use dates for y-axis
+        datasets: [{
+            label: ' Sales',
+            data: amounts, // Use amounts for x-axis
+            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+            borderColor: 'rgba(54, 162, 235, 1)',
+            borderWidth: 1
+        }]
+    },
+    options: {
+        scales: {
+            xAxes: [{
+                ticks: {
+                    beginAtZero: true
+                }
+            }]
+        }
+    }
+});
+
+        });
+    </script>
+        <script>
+  // Get the current date
+  var currentDate = new Date();
+
+  // Get the current month (0 indexed, so add 1)
+  var currentMonth = currentDate.getMonth() + 1;
+
+  // Get the month name based on the month number
+  var monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  var currentMonthName = monthNames[currentDate.getMonth()];
+
+  // Update the content of the h6 element with the current month
+  document.getElementById("currentMonth").innerText = "Sales: " + currentMonthName;
+</script>
+
+
+
+
+
+        <div class="col-sm-12 col-xl-6">
+                <div class="bg-light rounded h-100 p-4">
+                    <h6 class="mb-4">Low Inventory Product :</h6>
+
+                        <canvas id="inventory_level"></canvas>
+                </div>
+            </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // Parse data passed from Django view
+    var data = JSON.parse("{{ serialized_data_inventory_levels|escapejs }}");
+    var productNames = [];
+    var quantities = [];
+    data.forEach(function(item) {
+        productNames.push(item.product_name);
+        quantities.push(item.total_quantity);
+    });
+
+    var maxQuantity = Math.max.apply(null, quantities);
+    var ctx = document.getElementById('inventory_level').getContext('2d');
+    var chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: productNames,
+            datasets: [{
+                label: 'Quantity',
+                data: quantities,
+                backgroundColor: quantities.map(function(quantity) {
+                    // Calculate darkness based on quantity
+                    var darkness = quantity / maxQuantity;
+                    // Construct rgba color string with adjusted darkness
+                    return 'rgba(54, 162, 235, ' + darkness.toFixed(2) + ')';
+                }),
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero: true
+                    }
+                }]
+            }
+        }
+    });
+});
+</script>
+
+    </div>
+</div>
+
+
+
+
+<div class="container-fluid pt-4 px-4">
+    <div class="row g-4">
+            <div class="col-sm-12 col-xl-6">
+                <div class="bg-light rounded h-100 p-4">
+                    <h6 class="mb-4" id="currentMonths">Attendance Percentage:</h6>
+
+                        <canvas id="attendanceChart"></canvas>
+                </div>
+            </div>
+
+
+        <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('attendanceChart').getContext('2d');
+            const penaltyBonusData = {{ penalty_bonus|safe }};
+            const labels = Object.keys(penaltyBonusData);
+            const totalData = labels.map(label => penaltyBonusData[label].total_hours);
+            const penaltyData = labels.map(label => penaltyBonusData[label].penalty_hours);
+            const bonusData = labels.map(label => penaltyBonusData[label].bonus_hours);
+
+            const chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,  // Use staff names as labels
+                    datasets: [
+                        {
+                            label: 'Total Working Hours',
+                            data: totalData,
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Penalty Hours',
+                            data: penaltyData,
+                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Bonus Hours',
+                            data: bonusData,
+                            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            stacked: true
+                        },
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+
+
+
+        <script>
+  // Get the current date
+  var currentDate = new Date();
+
+  // Get the current month (0 indexed, so add 1)
+  var currentMonth = currentDate.getMonth() + 1;
+
+  // Get the month name based on the month number
+  var monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  var currentMonthName = monthNames[currentDate.getMonth()];
+
+  // Update the content of the h6 element with the current month
+  document.getElementById("currentMonths").innerText = "Attendance Percentage: " + currentMonthName;
+</script>
+
+
+
+        <div class="col-sm-12 col-xl-6">
+                <div class="bg-light rounded h-100 p-4">
+                    <h6 class="mb-4" >Category Chart:</h6>
+
+                        <canvas id="productChart"></canvas>
+                </div>
+            </div>
+<script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const data = {{ serialized_data_Category|safe }};
+            const categoryNames = data.map(item => item.category_name);
+            const productCounts = data.map(item => item.num_products);
+
+            const ctx = document.getElementById('productChart').getContext('2d');
+            const chart = new Chart(ctx, {
+                type: 'pie', // Change the chart type to 'pie'
+                data: {
+                    labels: categoryNames,
+                    datasets: [{
+                        label: 'Number of Products',
+                        data: productCounts,
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.2)',
+                            'rgba(54, 162, 235, 0.2)',
+                            'rgba(255, 206, 86, 0.2)',
+                            'rgba(75, 192, 192, 0.2)',
+                            'rgba(153, 102, 255, 0.2)',
+                            'rgba(255, 159, 64, 0.2)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)',
+                            'rgba(255, 159, 64, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+
+
+
+
+
+
+
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+<div class="container-fluid pt-4 px-4">
+    <div class="row g-4">
+
+
+    </div>
+</div>
+
+{% endif %}
+
+{% if user.staff.role == 2 %}
+<!--hr-->
+<div class="container-fluid pt-4 px-4">
+    <div class="row g-4">
+            <div class="col-sm-12 col-xl-6">
+                <div class="bg-light rounded h-100 p-4">
+                    <h6 class="mb-4" id="currentMonths">Attendance Percentage:</h6>
+
+                        <canvas id="attendanceChart"></canvas>
+                </div>
+            </div>
+        <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('attendanceChart').getContext('2d');
+            const penaltyBonusData = {{ penalty_bonus|safe }};
+            const labels = Object.keys(penaltyBonusData);
+            const totalData = labels.map(label => penaltyBonusData[label].total_hours);
+            const penaltyData = labels.map(label => penaltyBonusData[label].penalty_hours);
+            const bonusData = labels.map(label => penaltyBonusData[label].bonus_hours);
+
+            const chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,  // Use staff names as labels
+                    datasets: [
+                        {
+                            label: 'Total Working Hours',
+                            data: totalData,
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Penalty Hours',
+                            data: penaltyData,
+                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Bonus Hours',
+                            data: bonusData,
+                            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            stacked: true
+                        },
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+        <script>
+  // Get the current date
+  var currentDate = new Date();
+
+  // Get the current month (0 indexed, so add 1)
+  var currentMonth = currentDate.getMonth() + 1;
+
+  // Get the month name based on the month number
+  var monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  var currentMonthName = monthNames[currentDate.getMonth()];
+
+  // Update the content of the h6 element with the current month
+  document.getElementById("currentMonths").innerText = "Attendance Percentage: " + currentMonthName;
+</script>
+
+
+
+
+
+    </div>
+</div>
+
+{% endif %}
+
+{% if user.staff.role == 1 %}
+<!--staff-->
+
+<div class="container-fluid pt-4 px-4">
+    <div class="row g-4">
+            <div class="col-sm-12 col-xl-6">
+                <div class="bg-light rounded h-100 p-4">
+                    <h6 class="mb-4" id="currentMonth">Sales:</h6>
+
+                        <canvas id="invoiceChart"></canvas>
+                </div>
+            </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Parse data passed from Django view
+            var data = JSON.parse("{{ data|escapejs }}");
+            var dates = [];
+            var amounts = [];
+            data.forEach(function(item) {
+                dates.push(item.invoice_date);
+                amounts.push(item.total_amount);
+            });
+
+            var ctx = document.getElementById('invoiceChart').getContext('2d');
+    var chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: dates, // Use dates for y-axis
+        datasets: [{
+            label: ' Sales',
+            data: amounts, // Use amounts for x-axis
+            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+            borderColor: 'rgba(54, 162, 235, 1)',
+            borderWidth: 1
+        }]
+    },
+    options: {
+        scales: {
+            xAxes: [{
+                ticks: {
+                    beginAtZero: true
+                }
+            }]
+        }
+    }
+});
+
+        });
+    </script>
+        <script>
+  // Get the current date
+  var currentDate = new Date();
+
+  // Get the current month (0 indexed, so add 1)
+  var currentMonth = currentDate.getMonth() + 1;
+
+  // Get the month name based on the month number
+  var monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  var currentMonthName = monthNames[currentDate.getMonth()];
+
+  // Update the content of the h6 element with the current month
+  document.getElementById("currentMonth").innerText = "Sales: " + currentMonthName;
+</script>
+
+
+
+
+
+        <div class="col-sm-12 col-xl-6">
+                <div class="bg-light rounded h-100 p-4">
+                    <h6 class="mb-4">Inventory Levels :</h6>
+
+                        <canvas id="inventory_level"></canvas>
+                </div>
+            </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // Parse data passed from Django view
+    var data = JSON.parse("{{ serialized_data_inventory_levels|escapejs }}");
+    var productNames = [];
+    var quantities = [];
+    data.forEach(function(item) {
+        productNames.push(item.product_name);
+        quantities.push(item.total_quantity);
+    });
+
+    var maxQuantity = Math.max.apply(null, quantities);
+    var ctx = document.getElementById('inventory_level').getContext('2d');
+    var chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: productNames,
+            datasets: [{
+                label: 'Quantity',
+                data: quantities,
+                backgroundColor: quantities.map(function(quantity) {
+                    // Calculate darkness based on quantity
+                    var darkness = quantity / maxQuantity;
+                    // Construct rgba color string with adjusted darkness
+                    return 'rgba(54, 162, 235, ' + darkness.toFixed(2) + ')';
+                }),
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero: true
+                    }
+                }]
+            }
+        }
+    });
+});
+</script>
+
+
+
+    </div>
+</div>
+
+{% endif %}
+            <!-- Sale & Revenue End -->
+{% endblock %}
+<!--{% if user.is_authenticated %}-->
+<!--{% if user.staff.role == 1 %}-->
+<!--&lt;!&ndash; Staff Template Start &ndash;&gt;-->
+
+<!--<!DOCTYPE html>-->
+<!--<html lang="en">-->
+   <!--<head>-->
+      <!--<meta charset="utf-8">-->
+      <!--<title>DASHMIN - Bootstrap Admin Template</title>-->
+      <!--<meta content="width=device-width, initial-scale=1.0" name="viewport">-->
+      <!--<meta content="" name="keywords">-->
+      <!--<meta content="" name="description">-->
+      <!--&lt;!&ndash; Favicon &ndash;&gt;-->
+      <!--<link href="static/img/favicon.ico" rel="icon">-->
+      <!--&lt;!&ndash; Google Web Fonts &ndash;&gt;-->
+      <!--<link rel="preconnect" href="https://fonts.googleapis.com">-->
+      <!--<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>-->
+      <!--<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700&display=swap" rel="stylesheet">-->
+      <!--&lt;!&ndash; Icon Font Stylesheet &ndash;&gt;-->
+      <!--<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">-->
+      <!--<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">-->
+      <!--&lt;!&ndash; Libraries Stylesheet &ndash;&gt;-->
+      <!--<link href="static/lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet">-->
+      <!--<link href="static/lib/tempusdominus/css/tempusdominus-bootstrap-4.min.css" rel="stylesheet" />-->
+      <!--&lt;!&ndash; Customized Bootstrap Stylesheet &ndash;&gt;-->
+      <!--<link href="static/css/bootstrap.min.css" rel="stylesheet">-->
+      <!--&lt;!&ndash; Template Stylesheet &ndash;&gt;-->
+      <!--<link href="static/css/style.css" rel="stylesheet">-->
+   <!--</head>-->
+   <!--<body>-->
+		<!--<div class="container-xxl position-relative bg-white d-flex p-0">-->
+			<!--&lt;!&ndash; Spinner Start &ndash;&gt;-->
+			<!--&lt;!&ndash; Add your spinner content here &ndash;&gt;-->
+			<!--&lt;!&ndash; Spinner End &ndash;&gt;-->
+			<!--&lt;!&ndash; Sidebar Start &ndash;&gt;-->
+			<!--&lt;!&ndash; Add your sidebar content here &ndash;&gt;-->
+
+			<!--<div class="sidebar pe-4 pb-3">-->
+				<!--<nav class="navbar bg-light navbar-light">-->
+					<!--<a href="index" class="navbar-brand mx-4 mb-3">-->
+						<!--<h3 class="text-primary"><i class="fa fa-hashtag me-2"></i>ClothFlow</h3>-->
+					<!--</a>-->
+					<!--<div class="d-flex align-items-center ms-4 mb-4">-->
+						<!--<div class="position-relative">-->
+							<!--&lt;!&ndash;<img class="rounded-circle" src="static/img/user.jpg" alt="" style="width: 40px; height: 40px;">&ndash;&gt;-->
+							<!--{% if user.staff.profile_image %}-->
+							<!--<img class="rounded-circle me-lg-2" height="50" style="border-radius:100%" width="50" src="static{{ user.staff.profile_image.url }}" alt="Profile Image">-->
+							<!--{% else %}-->
+							<!--<img class="rounded-circle me-lg-2" src="https://bootdey.com/img/Content/avatar/avatar2.png" alt="Default Profile Image" style="width: 40px; height: 40px;">-->
+							<!--{% endif %}-->
+							<!--<div class="bg-success rounded-circle border border-2 border-white position-absolute end-0 bottom-0 p-1"></div>-->
+						<!--</div>-->
+						<!--<div class="ms-3">-->
+							<!--<h6 class="mb-0">{{user.first_name}} {{user.last_name}}</h6>-->
+							<!--&lt;!&ndash;role wise display start&ndash;&gt;-->
+							<!--<span class="d-none d-lg-inline-flex">-->
+                     <!--{% if user.is_authenticated %}-->
+                     <!--{% if user.staff.role == 1 %}-->
+                     <!--STAFF-->
+                     <!--{% elif user.staff.role == 2 %}-->
+                     <!--HR-->
+                     <!--{% endif %}-->
+                     <!--{% else %}-->
+                     <!--Welcome-->
+                     <!--{% endif %}-->
+                     <!--{% if user.is_authenticated %}-->
+                     <!--{% if user.is_superuser %}-->
+                     <!--Admin-->
+                     <!--{% endif %}-->
+                     <!--{% else %}-->
+                     <!--{% endif %}-->
+                     <!--</span>-->
+                     <!--&lt;!&ndash;role wise display end&ndash;&gt;-->
+                  <!--</div>-->
+               <!--</div>-->
+               <!--<div class="navbar-nav w-100">-->
+                  <!--<a href="index" class="nav-item nav-link active"><i class="fa fa-tachometer-alt me-2"></i>Dashboard</a>-->
+						<!--<div class="nav-item dropdown">-->
+							<!--<a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown"><i class="fa fa-laptop me-2"></i>Staff in progress</a>-->
+							<!--<div class="dropdown-menu bg-transparent border-0">-->
+								<!--<a href="display_leave_request" class="dropdown-item">Leave Request</a>-->
+								<!--<a href="leave_request_list_display_staff" class="dropdown-item">My Leave Request</a>-->
+
+
+							<!--</div>-->
+						<!--</div>-->
+
+
+						<!--<div class="nav-item dropdown">-->
+							<!--<a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown"><i class="fa fa-laptop me-2"></i>Inventory</a>-->
+							<!--<div class="dropdown-menu bg-transparent border-0">-->
+								<!--<a href="add_product" class="dropdown-item">Add Product</a>-->
+								<!--<a href="view_product" class="dropdown-item">View Product </a>-->
+								<!--<a href="view_section" class="dropdown-item">View Section </a>-->
+								<!--<a href="view_category" class="dropdown-item">View Category </a>-->
+								<!--<a href="view_brand" class="dropdown-item">View Brand </a>-->
+
+							<!--</div>-->
+						<!--</div>-->
+
+
+						<!--<div class="nav-item dropdown">-->
+							<!--<a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown"><i class="fa fa-laptop me-2"></i>Billings </a>-->
+							<!--<div class="dropdown-menu bg-transparent border-0">-->
+								<!--<a href="generate_invoice" class="dropdown-item">Generate Invoice</a>-->
+
+
+							<!--</div>-->
+						<!--</div>-->
+                  <!--<a href="widget.html" class="nav-item nav-link"><i class="fa fa-th me-2"></i>Widgets</a>-->
+                  <!--<a href="form.html" class="nav-item nav-link"><i class="fa fa-keyboard me-2"></i>Forms</a>-->
+                  <!--<a href="table.html" class="nav-item nav-link"><i class="fa fa-table me-2"></i>Tables</a>-->
+                  <!--<a href="chart.html" class="nav-item nav-link"><i class="fa fa-chart-bar me-2"></i>Charts</a>-->
+                  <!--<div class="nav-item dropdown">-->
+                     <!--<a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown"><i class="far fa-file-alt me-2"></i>Pages</a>-->
+                     <!--<div class="dropdown-menu bg-transparent border-0">-->
+                        <!--<a href="signin" class="dropdown-item">Sign In</a>-->
+                        <!--<a href="signup" class="dropdown-item">Sign Up</a>-->
+                        <!--<a href="404.html" class="dropdown-item">404 Error</a>-->
+                        <!--<a href="blank.html" class="dropdown-item">Blank Page</a>-->
+                     <!--</div>-->
+                  <!--</div>-->
+               <!--</div>-->
+            <!--</nav>-->
+         <!--</div>-->
+         <!--&lt;!&ndash; Sidebar End &ndash;&gt;-->
+         <!--&lt;!&ndash; Content Start &ndash;&gt;-->
+         <!--<div class="content">-->
+				<!--&lt;!&ndash; Navbar Start &ndash;&gt;-->
+				<!--&lt;!&ndash; Add your navbar content here &ndash;&gt;-->
+				<!--<nav class="navbar navbar-expand bg-light navbar-light sticky-top px-4 py-0">-->
+					<!--<a href="index.html" class="navbar-brand d-flex d-lg-none me-4">-->
+						<!--<h2 class="text-primary mb-0"><i class="fa fa-hashtag"></i></h2>-->
+					<!--</a>-->
+					<!--<a href="#" class="sidebar-toggler flex-shrink-0">-->
+					<!--<i class="fa fa-bars"></i>-->
+					<!--</a>-->
+					<!--<form class="d-none d-md-flex ms-4">-->
+						<!--<input class="form-control border-0" type="search" placeholder="Search">-->
+					<!--</form>-->
+					<!--<div class="navbar-nav align-items-center ms-auto">-->
+						<!--<div class="nav-item dropdown">-->
+							<!--<a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">-->
+							<!--<i class="fa fa-envelope me-lg-2"></i>-->
+							<!--<span class="d-none d-lg-inline-flex">Message</span>-->
+							<!--</a>-->
+							<!--<div class="dropdown-menu dropdown-menu-end bg-light border-0 rounded-0 rounded-bottom m-0">-->
+								<!--<a href="#" class="dropdown-item">-->
+									<!--<div class="d-flex align-items-center">-->
+										<!--<img class="rounded-circle" src="static/img/user.jpg" alt="" style="width: 40px; height: 40px;">-->
+										<!--<div class="ms-2">-->
+											<!--<h6 class="fw-normal mb-0">Jhon send you a message</h6>-->
+											<!--<small>15 minutes ago</small>-->
+										<!--</div>-->
+									<!--</div>-->
+								<!--</a>-->
+								<!--<hr class="dropdown-divider">-->
+								<!--<a href="#" class="dropdown-item">-->
+									<!--<div class="d-flex align-items-center">-->
+										<!--<img class="rounded-circle" src="static/img/user.jpg" alt="" style="width: 40px; height: 40px;">-->
+										<!--<div class="ms-2">-->
+											<!--<h6 class="fw-normal mb-0">Jhon send you a message</h6>-->
+											<!--<small>15 minutes ago</small>-->
+										<!--</div>-->
+									<!--</div>-->
+								<!--</a>-->
+								<!--<hr class="dropdown-divider">-->
+								<!--<a href="#" class="dropdown-item">-->
+									<!--<div class="d-flex align-items-center">-->
+										<!--<img class="rounded-circle" src="static/img/user.jpg" alt="" style="width: 40px; height: 40px;">-->
+										<!--<div class="ms-2">-->
+											<!--<h6 class="fw-normal mb-0">Jhon send you a message</h6>-->
+											<!--<small>15 minutes ago</small>-->
+										<!--</div>-->
+									<!--</div>-->
+								<!--</a>-->
+								<!--<hr class="dropdown-divider">-->
+								<!--<a href="#" class="dropdown-item text-center">See all message</a>-->
+							<!--</div>-->
+						<!--</div>-->
+						<!--<div class="nav-item dropdown">-->
+							<!--<a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">-->
+							<!--<i class="fa fa-bell me-lg-2"></i>-->
+							<!--<span class="d-none d-lg-inline-flex">Notificatin</span>-->
+							<!--</a>-->
+							<!--<div class="dropdown-menu dropdown-menu-end bg-light border-0 rounded-0 rounded-bottom m-0">-->
+								<!--<a href="#" class="dropdown-item">-->
+									<!--<h6 class="fw-normal mb-0">Profile updated</h6>-->
+									<!--<small>15 minutes ago</small>-->
+								<!--</a>-->
+								<!--<hr class="dropdown-divider">-->
+								<!--<a href="#" class="dropdown-item">-->
+									<!--<h6 class="fw-normal mb-0">New user added</h6>-->
+									<!--<small>15 minutes ago</small>-->
+								<!--</a>-->
+								<!--<hr class="dropdown-divider">-->
+								<!--<a href="#" class="dropdown-item">-->
+									<!--<h6 class="fw-normal mb-0">Password changed</h6>-->
+									<!--<small>15 minutes ago</small>-->
+								<!--</a>-->
+								<!--<hr class="dropdown-divider">-->
+								<!--<a href="#" class="dropdown-item text-center">See all notifications</a>-->
+							<!--</div>-->
+						<!--</div>-->
+						<!--&lt;!&ndash;<div class="nav-item dropdown">&ndash;&gt;-->
+						<!--&lt;!&ndash;<a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">&ndash;&gt;-->
+						<!--&lt;!&ndash;<img class="rounded-circle me-lg-2" src="static/img/user.jpg" alt="" style="width: 40px; height: 40px;">&ndash;&gt;-->
+						<!--&lt;!&ndash;<span class="d-none d-lg-inline-flex">{{user.email}}sdf</span>&ndash;&gt;-->
+						<!--&lt;!&ndash;</a>&ndash;&gt;-->
+						<!--&lt;!&ndash;<div class="dropdown-menu dropdown-menu-end bg-light border-0 rounded-0 rounded-bottom m-0">&ndash;&gt;-->
+						<!--&lt;!&ndash;<a href="#" class="dropdown-item">My Profile</a>&ndash;&gt;-->
+						<!--&lt;!&ndash;<a href="signin" class="dropdown-item">Sign In</a>&ndash;&gt;-->
+						<!--&lt;!&ndash;<a href="#" class="dropdown-item">Log Out</a>&ndash;&gt;-->
+						<!--&lt;!&ndash;</div>&ndash;&gt;-->
+						<!--&lt;!&ndash;</div>&ndash;&gt;-->
+						<!--&lt;!&ndash;if else code start&ndash;&gt;-->
+						<!--<div class="nav-item dropdown">-->
+							<!--<a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">-->
+								<!--&lt;!&ndash;<img class="rounded-circle me-lg-2" src="static/img/user.jpg" alt="" style="width: 40px; height: 40px;">&ndash;&gt;-->
+								<!--{% if user.staff.profile_image %}-->
+								<!--<img class="rounded-circle me-lg-2"  style="border-radius:100% width: 40px; height: 40px;" src="static{{ user.staff.profile_image.url }}" alt="Profile Image">-->
+								<!--{% else %}-->
+								<!--<img class="rounded-circle me-lg-2" src="https://bootdey.com/img/Content/avatar/avatar2.png" alt="Default Profile Image" style="width: 40px; height: 40px;">-->
+								<!--{% endif %}-->
+								<!--<span class="d-none d-lg-inline-flex">-->
+								<!--{% if user.is_authenticated %}-->
+								<!--Hii!-->
+								<!--{{ user.first_name }}-->
+								<!--{{ user.last_name }}-->
+								<!--{% else %}-->
+								<!--Login-->
+								<!--{% endif %}-->
+								<!--</span>-->
+							<!--</a>-->
+							<!--<div class="dropdown-menu dropdown-menu-end bg-light border-0 rounded-0 rounded-bottom m-0">-->
+								<!--{% if user.is_authenticated %}-->
+								<!--&lt;!&ndash;<a href="#" class="dropdown-item">My Profile</a>&ndash;&gt;-->
+								<!--{% if not user.is_superuser %}-->
+								<!--<form id="profile-form" action="{% url 'edit_my_profile' %}" method="post">-->
+									<!--{% csrf_token %}-->
+									<!--<input type="hidden" name="staff_id" value="{{ user.staff.staff_id }}">-->
+									<!--<a href="#" class="dropdown-item" onclick="document.getElementById('profile-form').submit();">My Profile</a>-->
+								<!--</form>-->
+								<!--{% endif %}-->
+
+
+
+								<!--{% if user.is_superuser %}-->
+								<!--<a href="admin" class="dropdown-item">Admin Panel</a>-->
+								<!--<a href="signup" class="dropdown-item">Add Employees</a>-->
+								<!--{% endif %}-->
+								<!--<a href="logout_user" class="dropdown-item">Log Out</a>-->
+								<!--{% else %}-->
+								<!--&lt;!&ndash;<a href="signin" class="dropdown-item">Sign In</a>&ndash;&gt;-->
+								<!--{% endif %}-->
+							<!--</div>-->
+						<!--</div>-->
+						<!--&lt;!&ndash;if else code end &ndash;&gt;-->
+					<!--</div>-->
+				<!--</nav>-->
+				<!--&lt;!&ndash; Navbar End &ndash;&gt;-->
+            <!--&lt;!&ndash; Sale & Revenue Start &ndash;&gt;-->
+            <!--<div class="container-fluid pt-4 px-4">-->
+               <!--<div class="row g-4">-->
+                  <!--<div class="col-sm-6 col-xl-3">-->
+                     <!--<div class="bg-light rounded d-flex align-items-center justify-content-between p-4">-->
+                        <!--<i class="fa fa-chart-line fa-3x text-primary"></i>-->
+                        <!--<div class="ms-3">-->
+                           <!--<p class="mb-2">Today Sale</p>-->
+                           <!--<h6 class="mb-0">Rs. {{today_sales}}</h6>-->
+                        <!--</div>-->
+                     <!--</div>-->
+                  <!--</div>-->
+                  <!--<div class="col-sm-6 col-xl-3">-->
+                     <!--<div class="bg-light rounded d-flex align-items-center justify-content-between p-4">-->
+                        <!--<i class="fa fa-chart-bar fa-3x text-primary"></i>-->
+                        <!--<div class="ms-3">-->
+                           <!--<p class="mb-2">Total Sale</p>-->
+                           <!--<h6 class="mb-0">Rs. {{total_sales}}</h6>-->
+                        <!--</div>-->
+                     <!--</div>-->
+                  <!--</div>-->
+                  <!--<div class="col-sm-6 col-xl-3">-->
+                     <!--<div class="bg-light rounded d-flex align-items-center justify-content-between p-4">-->
+                        <!--<i class="fa fa-chart-area fa-3x text-primary"></i>-->
+                        <!--<div class="ms-3">-->
+                           <!--<p class="mb-2">Today Revenue</p>-->
+                           <!--<h6 class="mb-0">$1234</h6>-->
+                        <!--</div>-->
+                     <!--</div>-->
+                  <!--</div>-->
+                  <!--<div class="col-sm-6 col-xl-3">-->
+                     <!--<div class="bg-light rounded d-flex align-items-center justify-content-between p-4">-->
+                        <!--<i class="fa fa-chart-pie fa-3x text-primary"></i>-->
+                        <!--<div class="ms-3">-->
+                           <!--<p class="mb-2">Total Revenue</p>-->
+                           <!--<h6 class="mb-0">$1234</h6>-->
+                        <!--</div>-->
+                     <!--</div>-->
+                  <!--</div>-->
+               <!--</div>-->
+            <!--</div>-->
+            <!--&lt;!&ndash; Sale & Revenue End &ndash;&gt;-->
+            <!--&lt;!&ndash; Sales Chart Start &ndash;&gt;-->
+            <!--<div class="container-fluid pt-4 px-4">-->
+               <!--<div class="row g-4">-->
+                  <!--<div class="col-sm-12 col-xl-6">-->
+                     <!--<div class="bg-light text-center rounded p-4">-->
+                        <!--<div class="d-flex align-items-center justify-content-between mb-4">-->
+                           <!--<h6 class="mb-0">Worldwide Sales</h6>-->
+                           <!--<a href="">Show All</a>-->
+                        <!--</div>-->
+                        <!--<canvas id="worldwide-sales"></canvas>-->
+                     <!--</div>-->
+                  <!--</div>-->
+                  <!--<div class="col-sm-12 col-xl-6">-->
+                     <!--<div class="bg-light text-center rounded p-4">-->
+                        <!--<div class="d-flex align-items-center justify-content-between mb-4">-->
+                           <!--<h6 class="mb-0">Salse & Revenue</h6>-->
+                           <!--<a href="">Show All</a>-->
+                        <!--</div>-->
+                        <!--<canvas id="salse-revenue"></canvas>-->
+                     <!--</div>-->
+                  <!--</div>-->
+               <!--</div>-->
+            <!--</div>-->
+            <!--&lt;!&ndash; Sales Chart End &ndash;&gt;-->
+            <!--&lt;!&ndash; Recent Sales Start &ndash;&gt;-->
+            <!--<div class="container-fluid pt-4 px-4">-->
+               <!--<div class="bg-light text-center rounded p-4">-->
+                  <!--<div class="d-flex align-items-center justify-content-between mb-4">-->
+                     <!--<h6 class="mb-0">Recent Salse</h6>-->
+                     <!--<a href="">Show All</a>-->
+                  <!--</div>-->
+                  <!--<div class="table-responsive">-->
+                     <!--<table class="table text-start align-middle table-bordered table-hover mb-0">-->
+                        <!--<thead>-->
+                           <!--<tr class="text-dark">-->
+                              <!--<th scope="col"><input class="form-check-input" type="checkbox"></th>-->
+                              <!--<th scope="col">Date</th>-->
+                              <!--<th scope="col">Invoice</th>-->
+                              <!--<th scope="col">Customer</th>-->
+                              <!--<th scope="col">Amount</th>-->
+                              <!--<th scope="col">Status</th>-->
+                              <!--<th scope="col">Action</th>-->
+                           <!--</tr>-->
+                        <!--</thead>-->
+                        <!--<tbody>-->
+                           <!--<tr>-->
+                              <!--<td><input class="form-check-input" type="checkbox"></td>-->
+                              <!--<td>01 Jan 2045</td>-->
+                              <!--<td>INV-0123</td>-->
+                              <!--<td>Jhon Doe</td>-->
+                              <!--<td>$123</td>-->
+                              <!--<td>Paid</td>-->
+                              <!--<td><a class="btn btn-sm btn-primary" href="">Detail</a></td>-->
+                           <!--</tr>-->
+                           <!--<tr>-->
+                              <!--<td><input class="form-check-input" type="checkbox"></td>-->
+                              <!--<td>01 Jan 2045</td>-->
+                              <!--<td>INV-0123</td>-->
+                              <!--<td>Jhon Doe</td>-->
+                              <!--<td>$123</td>-->
+                              <!--<td>Paid</td>-->
+                              <!--<td><a class="btn btn-sm btn-primary" href="">Detail</a></td>-->
+                           <!--</tr>-->
+                           <!--<tr>-->
+                              <!--<td><input class="form-check-input" type="checkbox"></td>-->
+                              <!--<td>01 Jan 2045</td>-->
+                              <!--<td>INV-0123</td>-->
+                              <!--<td>Jhon Doe</td>-->
+                              <!--<td>$123</td>-->
+                              <!--<td>Paid</td>-->
+                              <!--<td><a class="btn btn-sm btn-primary" href="">Detail</a></td>-->
+                           <!--</tr>-->
+                           <!--<tr>-->
+                              <!--<td><input class="form-check-input" type="checkbox"></td>-->
+                              <!--<td>01 Jan 2045</td>-->
+                              <!--<td>INV-0123</td>-->
+                              <!--<td>Jhon Doe</td>-->
+                              <!--<td>$123</td>-->
+                              <!--<td>Paid</td>-->
+                              <!--<td><a class="btn btn-sm btn-primary" href="">Detail</a></td>-->
+                           <!--</tr>-->
+                           <!--<tr>-->
+                              <!--<td><input class="form-check-input" type="checkbox"></td>-->
+                              <!--<td>01 Jan 2045</td>-->
+                              <!--<td>INV-0123</td>-->
+                              <!--<td>Jhon Doe</td>-->
+                              <!--<td>$123</td>-->
+                              <!--<td>Paid</td>-->
+                              <!--<td><a class="btn btn-sm btn-primary" href="">Detail</a></td>-->
+                           <!--</tr>-->
+                        <!--</tbody>-->
+                     <!--</table>-->
+                  <!--</div>-->
+               <!--</div>-->
+            <!--</div>-->
+            <!--&lt;!&ndash; Recent Sales End &ndash;&gt;-->
+            <!--&lt;!&ndash; Widgets Start &ndash;&gt;-->
+            <!--<div class="container-fluid pt-4 px-4">-->
+               <!--<div class="row g-4">-->
+                  <!--<div class="col-sm-12 col-md-6 col-xl-4">-->
+                     <!--<div class="h-100 bg-light rounded p-4">-->
+                        <!--<div class="d-flex align-items-center justify-content-between mb-2">-->
+                           <!--<h6 class="mb-0">Messages</h6>-->
+                           <!--<a href="">Show All</a>-->
+                        <!--</div>-->
+                        <!--<div class="d-flex align-items-center border-bottom py-3">-->
+                           <!--<img class="rounded-circle flex-shrink-0" src="static/img/user.jpg" alt="" style="width: 40px; height: 40px;">-->
+                           <!--<div class="w-100 ms-3">-->
+                              <!--<div class="d-flex w-100 justify-content-between">-->
+                                 <!--<h6 class="mb-0">Jhon Doe</h6>-->
+                                 <!--<small>15 minutes ago</small>-->
+                              <!--</div>-->
+                              <!--<span>Short message goes here...</span>-->
+                           <!--</div>-->
+                        <!--</div>-->
+                        <!--<div class="d-flex align-items-center border-bottom py-3">-->
+                           <!--<img class="rounded-circle flex-shrink-0" src="static/img/user.jpg" alt="" style="width: 40px; height: 40px;">-->
+                           <!--<div class="w-100 ms-3">-->
+                              <!--<div class="d-flex w-100 justify-content-between">-->
+                                 <!--<h6 class="mb-0">Jhon Doe</h6>-->
+                                 <!--<small>15 minutes ago</small>-->
+                              <!--</div>-->
+                              <!--<span>Short message goes here...</span>-->
+                           <!--</div>-->
+                        <!--</div>-->
+                        <!--<div class="d-flex align-items-center border-bottom py-3">-->
+                           <!--<img class="rounded-circle flex-shrink-0" src="static/img/user.jpg" alt="" style="width: 40px; height: 40px;">-->
+                           <!--<div class="w-100 ms-3">-->
+                              <!--<div class="d-flex w-100 justify-content-between">-->
+                                 <!--<h6 class="mb-0">Jhon Doe</h6>-->
+                                 <!--<small>15 minutes ago</small>-->
+                              <!--</div>-->
+                              <!--<span>Short message goes here...</span>-->
+                           <!--</div>-->
+                        <!--</div>-->
+                        <!--<div class="d-flex align-items-center pt-3">-->
+                           <!--<img class="rounded-circle flex-shrink-0" src="img/user.jpg" alt="" style="width: 40px; height: 40px;">-->
+                           <!--<div class="w-100 ms-3">-->
+                              <!--<div class="d-flex w-100 justify-content-between">-->
+                                 <!--<h6 class="mb-0">Jhon Doe</h6>-->
+                                 <!--<small>15 minutes ago</small>-->
+                              <!--</div>-->
+                              <!--<span>Short message goes here...</span>-->
+                           <!--</div>-->
+                        <!--</div>-->
+                     <!--</div>-->
+                  <!--</div>-->
+                  <!--<div class="col-sm-12 col-md-6 col-xl-4">-->
+                     <!--<div class="h-100 bg-light rounded p-4">-->
+                        <!--<div class="d-flex align-items-center justify-content-between mb-4">-->
+                           <!--<h6 class="mb-0">Calender</h6>-->
+                           <!--<a href="">Show All</a>-->
+                        <!--</div>-->
+                        <!--<div id="calender"></div>-->
+                     <!--</div>-->
+                  <!--</div>-->
+                  <!--<div class="col-sm-12 col-md-6 col-xl-4">-->
+                     <!--<div class="h-100 bg-light rounded p-4">-->
+                        <!--<div class="d-flex align-items-center justify-content-between mb-4">-->
+                           <!--<h6 class="mb-0">To Do List</h6>-->
+                           <!--<a href="">Show All</a>-->
+                        <!--</div>-->
+                        <!--<div class="d-flex mb-2">-->
+                           <!--<input class="form-control bg-transparent" type="text" placeholder="Enter task">-->
+                           <!--<button type="button" class="btn btn-primary ms-2">Add</button>-->
+                        <!--</div>-->
+                        <!--<div class="d-flex align-items-center border-bottom py-2">-->
+                           <!--<input class="form-check-input m-0" type="checkbox">-->
+                           <!--<div class="w-100 ms-3">-->
+                              <!--<div class="d-flex w-100 align-items-center justify-content-between">-->
+                                 <!--<span>Short task goes here...</span>-->
+                                 <!--<button class="btn btn-sm"><i class="fa fa-times"></i></button>-->
+                              <!--</div>-->
+                           <!--</div>-->
+                        <!--</div>-->
+                        <!--<div class="d-flex align-items-center border-bottom py-2">-->
+                           <!--<input class="form-check-input m-0" type="checkbox">-->
+                           <!--<div class="w-100 ms-3">-->
+                              <!--<div class="d-flex w-100 align-items-center justify-content-between">-->
+                                 <!--<span>Short task goes here...</span>-->
+                                 <!--<button class="btn btn-sm"><i class="fa fa-times"></i></button>-->
+                              <!--</div>-->
+                           <!--</div>-->
+                        <!--</div>-->
+                        <!--<div class="d-flex align-items-center border-bottom py-2">-->
+                           <!--<input class="form-check-input m-0" type="checkbox" checked>-->
+                           <!--<div class="w-100 ms-3">-->
+                              <!--<div class="d-flex w-100 align-items-center justify-content-between">-->
+                                 <!--<span><del>Short task goes here...</del></span>-->
+                                 <!--<button class="btn btn-sm text-primary"><i class="fa fa-times"></i></button>-->
+                              <!--</div>-->
+                           <!--</div>-->
+                        <!--</div>-->
+                        <!--<div class="d-flex align-items-center border-bottom py-2">-->
+                           <!--<input class="form-check-input m-0" type="checkbox">-->
+                           <!--<div class="w-100 ms-3">-->
+                              <!--<div class="d-flex w-100 align-items-center justify-content-between">-->
+                                 <!--<span>Short task goes here...</span>-->
+                                 <!--<button class="btn btn-sm"><i class="fa fa-times"></i></button>-->
+                              <!--</div>-->
+                           <!--</div>-->
+                        <!--</div>-->
+                        <!--<div class="d-flex align-items-center pt-2">-->
+                           <!--<input class="form-check-input m-0" type="checkbox">-->
+                           <!--<div class="w-100 ms-3">-->
+                              <!--<div class="d-flex w-100 align-items-center justify-content-between">-->
+                                 <!--<span>Short task goes here...</span>-->
+                                 <!--<button class="btn btn-sm"><i class="fa fa-times"></i></button>-->
+                              <!--</div>-->
+                           <!--</div>-->
+                        <!--</div>-->
+                     <!--</div>-->
+                  <!--</div>-->
+               <!--</div>-->
+            <!--</div>-->
+            <!--&lt;!&ndash; Widgets End &ndash;&gt;-->
+            <!--&lt;!&ndash; Footer Start &ndash;&gt;-->
+            <!--<div class="container-fluid pt-4 px-4">-->
+               <!--<div class="bg-light rounded-top p-4">-->
+                  <!--<div class="row">-->
+                     <!--<div class="col-12 col-sm-6 text-center text-sm-start">-->
+                        <!--&copy; <a href="#">Your Site Name</a>, All Right Reserved.-->
+                     <!--</div>-->
+                     <!--<div class="col-12 col-sm-6 text-center text-sm-end">-->
+                        <!--&lt;!&ndash;/*** This template is free as long as you keep the footer author’s credit link/attribution link/backlink. If you'd like to use the template without the footer author’s credit link/attribution link/backlink, you can purchase the Credit Removal License from "https://htmlcodex.com/credit-removal". Thank you for your support. ***/&ndash;&gt;-->
+                        <!--Designed By <a href="https://htmlcodex.com">HTML Codex</a>-->
+                        <!--</br>-->
+                        <!--Distributed By <a class="border-bottom" href="https://themewagon.com" target="_blank">ThemeWagon</a>-->
+                     <!--</div>-->
+                  <!--</div>-->
+               <!--</div>-->
+            <!--</div>-->
+            <!--&lt;!&ndash; Footer End &ndash;&gt;-->
+         <!--</div>-->
+         <!--&lt;!&ndash; Content End &ndash;&gt;-->
+         <!--&lt;!&ndash; Back to Top &ndash;&gt;-->
+         <!--<a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="bi bi-arrow-up"></i></a>-->
+      <!--</div>-->
+      <!--&lt;!&ndash;this index end HR&ndash;&gt;-->
+      <!--&lt;!&ndash; JavaScript Libraries &ndash;&gt;-->
+      <!--<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>-->
+      <!--<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>-->
+      <!--<script src="static/lib/chart/chart.min.js"></script>-->
+      <!--<script src="static/lib/easing/easing.min.js"></script>-->
+      <!--<script src="static/lib/waypoints/waypoints.min.js"></script>-->
+      <!--<script src="static/lib/owlcarousel/owl.carousel.min.js"></script>-->
+      <!--<script src="static/lib/tempusdominus/js/moment.min.js"></script>-->
+      <!--<script src="static/lib/tempusdominus/js/moment-timezone.min.js"></script>-->
+      <!--<script src="static/lib/tempusdominus/js/tempusdominus-bootstrap-4.min.js"></script>-->
+      <!--&lt;!&ndash; Template Javascript &ndash;&gt;-->
+      <!--<script src="static/js/main.js"></script>-->
+   <!--</body>-->
+<!--</html>-->
+<!--&lt;!&ndash; Staff Template End &ndash;&gt;-->
+<!--&lt;!&ndash; HR Template Start &ndash;&gt;-->
+<!--{% elif user.staff.role == 2 %}-->
+
+<!--<!DOCTYPE html>-->
+<!--<html lang="en">-->
+   <!--<head>-->
+      <!--<meta charset="utf-8">-->
+      <!--<title>DASHMIN - Bootstrap Admin Template</title>-->
+      <!--<meta content="width=device-width, initial-scale=1.0" name="viewport">-->
+      <!--<meta content="" name="keywords">-->
+      <!--<meta content="" name="description">-->
+      <!--&lt;!&ndash; Favicon &ndash;&gt;-->
+      <!--<link href="static/img/favicon.ico" rel="icon">-->
+      <!--&lt;!&ndash; Google Web Fonts &ndash;&gt;-->
+      <!--<link rel="preconnect" href="https://fonts.googleapis.com">-->
+      <!--<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>-->
+      <!--<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700&display=swap" rel="stylesheet">-->
+      <!--&lt;!&ndash; Icon Font Stylesheet &ndash;&gt;-->
+      <!--<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">-->
+      <!--<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">-->
+      <!--&lt;!&ndash; Libraries Stylesheet &ndash;&gt;-->
+      <!--<link href="static/lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet">-->
+      <!--<link href="static/lib/tempusdominus/css/tempusdominus-bootstrap-4.min.css" rel="stylesheet" />-->
+      <!--&lt;!&ndash; Customized Bootstrap Stylesheet &ndash;&gt;-->
+      <!--<link href="static/css/bootstrap.min.css" rel="stylesheet">-->
+      <!--&lt;!&ndash; Template Stylesheet &ndash;&gt;-->
+      <!--<link href="static/css/style.css" rel="stylesheet">-->
+   <!--</head>-->
+   <!--<body>-->
+      <!--<div class="container-xxl position-relative bg-white d-flex p-0">-->
+			<!--&lt;!&ndash; Spinner Start &ndash;&gt;-->
+			<!--&lt;!&ndash; Add your spinner content here &ndash;&gt;-->
+			<!--&lt;!&ndash; Spinner End &ndash;&gt;-->
+			<!--&lt;!&ndash; Sidebar Start &ndash;&gt;-->
+			<!--&lt;!&ndash; Add your sidebar content here &ndash;&gt;-->
+
+			<!--<div class="sidebar pe-4 pb-3">-->
+				<!--<nav class="navbar bg-light navbar-light">-->
+					<!--<a href="index" class="navbar-brand mx-4 mb-3">-->
+						<!--<h3 class="text-primary"><i class="fa fa-hashtag me-2"></i>ClothFlow</h3>-->
+					<!--</a>-->
+					<!--<div class="d-flex align-items-center ms-4 mb-4">-->
+						<!--<div class="position-relative">-->
+							<!--&lt;!&ndash;<img class="rounded-circle" src="static/img/user.jpg" alt="" style="width: 40px; height: 40px;">&ndash;&gt;-->
+							<!--{% if user.staff.profile_image %}-->
+							<!--<img class="rounded-circle me-lg-2" height="50" style="border-radius:100%" width="50" src="static{{ user.staff.profile_image.url }}" alt="Profile Image">-->
+							<!--{% else %}-->
+							<!--<img class="rounded-circle me-lg-2" src="https://bootdey.com/img/Content/avatar/avatar2.png" alt="Default Profile Image" style="width: 40px; height: 40px;">-->
+							<!--{% endif %}-->
+							<!--<div class="bg-success rounded-circle border border-2 border-white position-absolute end-0 bottom-0 p-1"></div>-->
+						<!--</div>-->
+						<!--<div class="ms-3">-->
+							<!--<h6 class="mb-0">{{user.first_name}} {{user.last_name}}</h6>-->
+							<!--&lt;!&ndash;role wise display start&ndash;&gt;-->
+							<!--<span class="d-none d-lg-inline-flex">-->
+                     <!--&lt;!&ndash;role wise display start&ndash;&gt;-->
+                     <!--<span class="d-none d-lg-inline-flex">-->
+                     <!--{% if user.is_authenticated %}-->
+                     <!--{% if user.staff.role == 1 %}-->
+                     <!--STAFF-->
+                     <!--{% elif user.staff.role == 2 %}-->
+                     <!--HR-->
+                     <!--{% endif %}-->
+                     <!--{% else %}-->
+                     <!--Welcome-->
+                     <!--{% endif %}-->
+                     <!--{% if user.is_authenticated %}-->
+                     <!--{% if user.is_superuser %}-->
+                     <!--Admin-->
+                     <!--{% endif %}-->
+                     <!--{% else %}-->
+                     <!--{% endif %}-->
+                     <!--</span>-->
+                     <!--&lt;!&ndash;role wise display end&ndash;&gt;-->
+                  <!--</div>-->
+               <!--</div>-->
+               <!--<div class="navbar-nav w-100">-->
+                  <!--<a href="index" class="nav-item nav-link active"><i class="fa fa-tachometer-alt me-2"></i>Dashboard</a>-->
+						<!--<div class="nav-item dropdown">-->
+							<!--<a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown"><i class="fa fa-laptop me-2"></i>Employees</a>-->
+							<!--<div class="dropdown-menu bg-transparent border-0">-->
+								<!--<a href="employee_details" class="dropdown-item">View Details</a>-->
+								<!--<a href="display_attendance" class="dropdown-item">Mark Attendance</a>-->
+								<!--<a href="display_leave_request" class="dropdown-item">Leave Request</a>-->
+								<!--<a href="leave_request_list_display_staff" class="dropdown-item">My Leave Request</a>-->
+								<!--<a href="leave_request_list_display_hr" class="dropdown-item">View Staff Leave Request</a>-->
+
+
+							<!--</div>-->
+						<!--</div>-->
+                  <!--<a href="widget.html" class="nav-item nav-link"><i class="fa fa-th me-2"></i>Widgets</a>-->
+                  <!--<a href="form.html" class="nav-item nav-link"><i class="fa fa-keyboard me-2"></i>Forms</a>-->
+                  <!--<a href="table.html" class="nav-item nav-link"><i class="fa fa-table me-2"></i>Tables</a>-->
+                  <!--<a href="chart.html" class="nav-item nav-link"><i class="fa fa-chart-bar me-2"></i>Charts</a>-->
+                  <!--<div class="nav-item dropdown">-->
+                     <!--<a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown"><i class="far fa-file-alt me-2"></i>Pages</a>-->
+                     <!--<div class="dropdown-menu bg-transparent border-0">-->
+                        <!--<a href="signin" class="dropdown-item">Sign In</a>-->
+                        <!--<a href="signup" class="dropdown-item">Sign Up</a>-->
+                        <!--<a href="404.html" class="dropdown-item">404 Error</a>-->
+                        <!--<a href="blank.html" class="dropdown-item">Blank Page</a>-->
+                     <!--</div>-->
+                  <!--</div>-->
+               <!--</div>-->
+            <!--</nav>-->
+         <!--</div>-->
+         <!--&lt;!&ndash; Sidebar End &ndash;&gt;-->
+         <!--&lt;!&ndash; Content Start &ndash;&gt;-->
+         <!--<div class="content">-->
+				<!--&lt;!&ndash; Navbar Start &ndash;&gt;-->
+				<!--&lt;!&ndash; Add your navbar content here &ndash;&gt;-->
+				<!--<nav class="navbar navbar-expand bg-light navbar-light sticky-top px-4 py-0">-->
+					<!--<a href="index.html" class="navbar-brand d-flex d-lg-none me-4">-->
+						<!--<h2 class="text-primary mb-0"><i class="fa fa-hashtag"></i></h2>-->
+					<!--</a>-->
+					<!--<a href="#" class="sidebar-toggler flex-shrink-0">-->
+					<!--<i class="fa fa-bars"></i>-->
+					<!--</a>-->
+					<!--<form class="d-none d-md-flex ms-4">-->
+						<!--<input class="form-control border-0" type="search" placeholder="Search">-->
+					<!--</form>-->
+					<!--<div class="navbar-nav align-items-center ms-auto">-->
+						<!--<div class="nav-item dropdown">-->
+							<!--<a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">-->
+							<!--<i class="fa fa-envelope me-lg-2"></i>-->
+							<!--<span class="d-none d-lg-inline-flex">Message</span>-->
+							<!--</a>-->
+							<!--<div class="dropdown-menu dropdown-menu-end bg-light border-0 rounded-0 rounded-bottom m-0">-->
+								<!--<a href="#" class="dropdown-item">-->
+									<!--<div class="d-flex align-items-center">-->
+										<!--<img class="rounded-circle" src="static/img/user.jpg" alt="" style="width: 40px; height: 40px;">-->
+										<!--<div class="ms-2">-->
+											<!--<h6 class="fw-normal mb-0">Jhon send you a message</h6>-->
+											<!--<small>15 minutes ago</small>-->
+										<!--</div>-->
+									<!--</div>-->
+								<!--</a>-->
+								<!--<hr class="dropdown-divider">-->
+								<!--<a href="#" class="dropdown-item">-->
+									<!--<div class="d-flex align-items-center">-->
+										<!--<img class="rounded-circle" src="static/img/user.jpg" alt="" style="width: 40px; height: 40px;">-->
+										<!--<div class="ms-2">-->
+											<!--<h6 class="fw-normal mb-0">Jhon send you a message</h6>-->
+											<!--<small>15 minutes ago</small>-->
+										<!--</div>-->
+									<!--</div>-->
+								<!--</a>-->
+								<!--<hr class="dropdown-divider">-->
+								<!--<a href="#" class="dropdown-item">-->
+									<!--<div class="d-flex align-items-center">-->
+										<!--<img class="rounded-circle" src="static/img/user.jpg" alt="" style="width: 40px; height: 40px;">-->
+										<!--<div class="ms-2">-->
+											<!--<h6 class="fw-normal mb-0">Jhon send you a message</h6>-->
+											<!--<small>15 minutes ago</small>-->
+										<!--</div>-->
+									<!--</div>-->
+								<!--</a>-->
+								<!--<hr class="dropdown-divider">-->
+								<!--<a href="#" class="dropdown-item text-center">See all message</a>-->
+							<!--</div>-->
+						<!--</div>-->
+						<!--<div class="nav-item dropdown">-->
+							<!--<a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">-->
+							<!--<i class="fa fa-bell me-lg-2"></i>-->
+							<!--<span class="d-none d-lg-inline-flex">Notificatin</span>-->
+							<!--</a>-->
+							<!--<div class="dropdown-menu dropdown-menu-end bg-light border-0 rounded-0 rounded-bottom m-0">-->
+								<!--<a href="#" class="dropdown-item">-->
+									<!--<h6 class="fw-normal mb-0">Profile updated</h6>-->
+									<!--<small>15 minutes ago</small>-->
+								<!--</a>-->
+								<!--<hr class="dropdown-divider">-->
+								<!--<a href="#" class="dropdown-item">-->
+									<!--<h6 class="fw-normal mb-0">New user added</h6>-->
+									<!--<small>15 minutes ago</small>-->
+								<!--</a>-->
+								<!--<hr class="dropdown-divider">-->
+								<!--<a href="#" class="dropdown-item">-->
+									<!--<h6 class="fw-normal mb-0">Password changed</h6>-->
+									<!--<small>15 minutes ago</small>-->
+								<!--</a>-->
+								<!--<hr class="dropdown-divider">-->
+								<!--<a href="#" class="dropdown-item text-center">See all notifications</a>-->
+							<!--</div>-->
+						<!--</div>-->
+						<!--&lt;!&ndash;<div class="nav-item dropdown">&ndash;&gt;-->
+						<!--&lt;!&ndash;<a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">&ndash;&gt;-->
+						<!--&lt;!&ndash;<img class="rounded-circle me-lg-2" src="static/img/user.jpg" alt="" style="width: 40px; height: 40px;">&ndash;&gt;-->
+						<!--&lt;!&ndash;<span class="d-none d-lg-inline-flex">{{user.email}}sdf</span>&ndash;&gt;-->
+						<!--&lt;!&ndash;</a>&ndash;&gt;-->
+						<!--&lt;!&ndash;<div class="dropdown-menu dropdown-menu-end bg-light border-0 rounded-0 rounded-bottom m-0">&ndash;&gt;-->
+						<!--&lt;!&ndash;<a href="#" class="dropdown-item">My Profile</a>&ndash;&gt;-->
+						<!--&lt;!&ndash;<a href="signin" class="dropdown-item">Sign In</a>&ndash;&gt;-->
+						<!--&lt;!&ndash;<a href="#" class="dropdown-item">Log Out</a>&ndash;&gt;-->
+						<!--&lt;!&ndash;</div>&ndash;&gt;-->
+						<!--&lt;!&ndash;</div>&ndash;&gt;-->
+						<!--&lt;!&ndash;if else code start&ndash;&gt;-->
+						<!--<div class="nav-item dropdown">-->
+							<!--<a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">-->
+								<!--&lt;!&ndash;<img class="rounded-circle me-lg-2" src="static/img/user.jpg" alt="" style="width: 40px; height: 40px;">&ndash;&gt;-->
+								<!--{% if user.staff.profile_image %}-->
+								<!--<img class="rounded-circle me-lg-2"  style="border-radius:100% width: 40px; height: 40px;" src="static{{ user.staff.profile_image.url }}" alt="Profile Image">-->
+								<!--{% else %}-->
+								<!--<img class="rounded-circle me-lg-2" src="https://bootdey.com/img/Content/avatar/avatar2.png" alt="Default Profile Image" style="width: 40px; height: 40px;">-->
+								<!--{% endif %}-->
+								<!--<span class="d-none d-lg-inline-flex">-->
+								<!--{% if user.is_authenticated %}-->
+								<!--Hii!-->
+								<!--{{ user.first_name }}-->
+								<!--{{ user.last_name }}-->
+								<!--{% else %}-->
+								<!--Login-->
+								<!--{% endif %}-->
+								<!--</span>-->
+							<!--</a>-->
+							<!--<div class="dropdown-menu dropdown-menu-end bg-light border-0 rounded-0 rounded-bottom m-0">-->
+								<!--{% if user.is_authenticated %}-->
+								<!--&lt;!&ndash;<a href="#" class="dropdown-item">My Profile</a>&ndash;&gt;-->
+								<!--{% if not user.is_superuser %}-->
+								<!--<form id="profile-form" action="{% url 'edit_my_profile' %}" method="post">-->
+									<!--{% csrf_token %}-->
+									<!--<input type="hidden" name="staff_id" value="{{ user.staff.staff_id }}">-->
+									<!--<a href="#" class="dropdown-item" onclick="document.getElementById('profile-form').submit();">My Profile</a>-->
+								<!--</form>-->
+								<!--{% endif %}-->
+
+
+
+								<!--{% if user.is_superuser %}-->
+								<!--<a href="admin" class="dropdown-item">Admin Panel</a>-->
+								<!--<a href="signup" class="dropdown-item">Add Employees</a>-->
+								<!--{% endif %}-->
+								<!--<a href="logout_user" class="dropdown-item">Log Out</a>-->
+								<!--{% else %}-->
+								<!--&lt;!&ndash;<a href="signin" class="dropdown-item">Sign In</a>&ndash;&gt;-->
+								<!--{% endif %}-->
+							<!--</div>-->
+						<!--</div>-->
+						<!--&lt;!&ndash;if else code end &ndash;&gt;-->
+					<!--</div>-->
+				<!--</nav>-->
+				<!--&lt;!&ndash; Navbar End &ndash;&gt;-->
+            <!--&lt;!&ndash; Sale & Revenue Start &ndash;&gt;-->
+            <!--<div class="container-fluid pt-4 px-4">-->
+               <!--<div class="row g-4">-->
+                  <!--<div class="col-sm-6 col-xl-3">-->
+                     <!--<div class="bg-light rounded d-flex align-items-center justify-content-between p-4">-->
+                        <!--<i class="fa fa-chart-line fa-3x text-primary"></i>-->
+                        <!--<div class="ms-3">-->
+                           <!--<p class="mb-2">Today Sale</p>-->
+                           <!--<h6 class="mb-0">Rs. {{today_sales}}</h6>-->
+                        <!--</div>-->
+                     <!--</div>-->
+                  <!--</div>-->
+                  <!--<div class="col-sm-6 col-xl-3">-->
+                     <!--<div class="bg-light rounded d-flex align-items-center justify-content-between p-4">-->
+                        <!--<i class="fa fa-chart-bar fa-3x text-primary"></i>-->
+                        <!--<div class="ms-3">-->
+                           <!--<p class="mb-2">Total Sale</p>-->
+                           <!--<h6 class="mb-0">Rs. {{total_sales}}</h6>-->
+                        <!--</div>-->
+                     <!--</div>-->
+                  <!--</div>-->
+                  <!--<div class="col-sm-6 col-xl-3">-->
+                     <!--<div class="bg-light rounded d-flex align-items-center justify-content-between p-4">-->
+                        <!--<i class="fa fa-chart-area fa-3x text-primary"></i>-->
+                        <!--<div class="ms-3">-->
+                           <!--<p class="mb-2">Today Revenue</p>-->
+                           <!--<h6 class="mb-0">$1234</h6>-->
+                        <!--</div>-->
+                     <!--</div>-->
+                  <!--</div>-->
+                  <!--<div class="col-sm-6 col-xl-3">-->
+                     <!--<div class="bg-light rounded d-flex align-items-center justify-content-between p-4">-->
+                        <!--<i class="fa fa-chart-pie fa-3x text-primary"></i>-->
+                        <!--<div class="ms-3">-->
+                           <!--<p class="mb-2">Total Revenue</p>-->
+                           <!--<h6 class="mb-0">$1234</h6>-->
+                        <!--</div>-->
+                     <!--</div>-->
+                  <!--</div>-->
+               <!--</div>-->
+            <!--</div>-->
+            <!--&lt;!&ndash; Sale & Revenue End &ndash;&gt;-->
+            <!--&lt;!&ndash; Sales Chart Start &ndash;&gt;-->
+            <!--<div class="container-fluid pt-4 px-4">-->
+               <!--<div class="row g-4">-->
+                  <!--<div class="col-sm-12 col-xl-6">-->
+                     <!--<div class="bg-light text-center rounded p-4">-->
+                        <!--<div class="d-flex align-items-center justify-content-between mb-4">-->
+                           <!--<h6 class="mb-0">Worldwide Sales</h6>-->
+                           <!--<a href="">Show All</a>-->
+                        <!--</div>-->
+                        <!--<canvas id="worldwide-sales"></canvas>-->
+                     <!--</div>-->
+                  <!--</div>-->
+                  <!--<div class="col-sm-12 col-xl-6">-->
+                     <!--<div class="bg-light text-center rounded p-4">-->
+                        <!--<div class="d-flex align-items-center justify-content-between mb-4">-->
+                           <!--<h6 class="mb-0">Salse & Revenue</h6>-->
+                           <!--<a href="">Show All</a>-->
+                        <!--</div>-->
+                        <!--<canvas id="salse-revenue"></canvas>-->
+                     <!--</div>-->
+                  <!--</div>-->
+               <!--</div>-->
+            <!--</div>-->
+            <!--&lt;!&ndash; Sales Chart End &ndash;&gt;-->
+            <!--&lt;!&ndash; Recent Sales Start &ndash;&gt;-->
+            <!--<div class="container-fluid pt-4 px-4">-->
+               <!--<div class="bg-light text-center rounded p-4">-->
+                  <!--<div class="d-flex align-items-center justify-content-between mb-4">-->
+                     <!--<h6 class="mb-0">Recent Salse</h6>-->
+                     <!--<a href="">Show All</a>-->
+                  <!--</div>-->
+                  <!--<div class="table-responsive">-->
+                     <!--<table class="table text-start align-middle table-bordered table-hover mb-0">-->
+                        <!--<thead>-->
+                           <!--<tr class="text-dark">-->
+                              <!--<th scope="col"><input class="form-check-input" type="checkbox"></th>-->
+                              <!--<th scope="col">Date</th>-->
+                              <!--<th scope="col">Invoice</th>-->
+                              <!--<th scope="col">Customer</th>-->
+                              <!--<th scope="col">Amount</th>-->
+                              <!--<th scope="col">Status</th>-->
+                              <!--<th scope="col">Action</th>-->
+                           <!--</tr>-->
+                        <!--</thead>-->
+                        <!--<tbody>-->
+                           <!--<tr>-->
+                              <!--<td><input class="form-check-input" type="checkbox"></td>-->
+                              <!--<td>01 Jan 2045</td>-->
+                              <!--<td>INV-0123</td>-->
+                              <!--<td>Jhon Doe</td>-->
+                              <!--<td>$123</td>-->
+                              <!--<td>Paid</td>-->
+                              <!--<td><a class="btn btn-sm btn-primary" href="">Detail</a></td>-->
+                           <!--</tr>-->
+                           <!--<tr>-->
+                              <!--<td><input class="form-check-input" type="checkbox"></td>-->
+                              <!--<td>01 Jan 2045</td>-->
+                              <!--<td>INV-0123</td>-->
+                              <!--<td>Jhon Doe</td>-->
+                              <!--<td>$123</td>-->
+                              <!--<td>Paid</td>-->
+                              <!--<td><a class="btn btn-sm btn-primary" href="">Detail</a></td>-->
+                           <!--</tr>-->
+                           <!--<tr>-->
+                              <!--<td><input class="form-check-input" type="checkbox"></td>-->
+                              <!--<td>01 Jan 2045</td>-->
+                              <!--<td>INV-0123</td>-->
+                              <!--<td>Jhon Doe</td>-->
+                              <!--<td>$123</td>-->
+                              <!--<td>Paid</td>-->
+                              <!--<td><a class="btn btn-sm btn-primary" href="">Detail</a></td>-->
+                           <!--</tr>-->
+                           <!--<tr>-->
+                              <!--<td><input class="form-check-input" type="checkbox"></td>-->
+                              <!--<td>01 Jan 2045</td>-->
+                              <!--<td>INV-0123</td>-->
+                              <!--<td>Jhon Doe</td>-->
+                              <!--<td>$123</td>-->
+                              <!--<td>Paid</td>-->
+                              <!--<td><a class="btn btn-sm btn-primary" href="">Detail</a></td>-->
+                           <!--</tr>-->
+                           <!--<tr>-->
+                              <!--<td><input class="form-check-input" type="checkbox"></td>-->
+                              <!--<td>01 Jan 2045</td>-->
+                              <!--<td>INV-0123</td>-->
+                              <!--<td>Jhon Doe</td>-->
+                              <!--<td>$123</td>-->
+                              <!--<td>Paid</td>-->
+                              <!--<td><a class="btn btn-sm btn-primary" href="">Detail</a></td>-->
+                           <!--</tr>-->
+                        <!--</tbody>-->
+                     <!--</table>-->
+                  <!--</div>-->
+               <!--</div>-->
+            <!--</div>-->
+            <!--&lt;!&ndash; Recent Sales End &ndash;&gt;-->
+            <!--&lt;!&ndash; Widgets Start &ndash;&gt;-->
+            <!--<div class="container-fluid pt-4 px-4">-->
+               <!--<div class="row g-4">-->
+                  <!--<div class="col-sm-12 col-md-6 col-xl-4">-->
+                     <!--<div class="h-100 bg-light rounded p-4">-->
+                        <!--<div class="d-flex align-items-center justify-content-between mb-2">-->
+                           <!--<h6 class="mb-0">Messages</h6>-->
+                           <!--<a href="">Show All</a>-->
+                        <!--</div>-->
+                        <!--<div class="d-flex align-items-center border-bottom py-3">-->
+                           <!--<img class="rounded-circle flex-shrink-0" src="static/img/user.jpg" alt="" style="width: 40px; height: 40px;">-->
+                           <!--<div class="w-100 ms-3">-->
+                              <!--<div class="d-flex w-100 justify-content-between">-->
+                                 <!--<h6 class="mb-0">Jhon Doe</h6>-->
+                                 <!--<small>15 minutes ago</small>-->
+                              <!--</div>-->
+                              <!--<span>Short message goes here...</span>-->
+                           <!--</div>-->
+                        <!--</div>-->
+                        <!--<div class="d-flex align-items-center border-bottom py-3">-->
+                           <!--<img class="rounded-circle flex-shrink-0" src="static/img/user.jpg" alt="" style="width: 40px; height: 40px;">-->
+                           <!--<div class="w-100 ms-3">-->
+                              <!--<div class="d-flex w-100 justify-content-between">-->
+                                 <!--<h6 class="mb-0">Jhon Doe</h6>-->
+                                 <!--<small>15 minutes ago</small>-->
+                              <!--</div>-->
+                              <!--<span>Short message goes here...</span>-->
+                           <!--</div>-->
+                        <!--</div>-->
+                        <!--<div class="d-flex align-items-center border-bottom py-3">-->
+                           <!--<img class="rounded-circle flex-shrink-0" src="static/img/user.jpg" alt="" style="width: 40px; height: 40px;">-->
+                           <!--<div class="w-100 ms-3">-->
+                              <!--<div class="d-flex w-100 justify-content-between">-->
+                                 <!--<h6 class="mb-0">Jhon Doe</h6>-->
+                                 <!--<small>15 minutes ago</small>-->
+                              <!--</div>-->
+                              <!--<span>Short message goes here...</span>-->
+                           <!--</div>-->
+                        <!--</div>-->
+                        <!--<div class="d-flex align-items-center pt-3">-->
+                           <!--<img class="rounded-circle flex-shrink-0" src="img/user.jpg" alt="" style="width: 40px; height: 40px;">-->
+                           <!--<div class="w-100 ms-3">-->
+                              <!--<div class="d-flex w-100 justify-content-between">-->
+                                 <!--<h6 class="mb-0">Jhon Doe</h6>-->
+                                 <!--<small>15 minutes ago</small>-->
+                              <!--</div>-->
+                              <!--<span>Short message goes here...</span>-->
+                           <!--</div>-->
+                        <!--</div>-->
+                     <!--</div>-->
+                  <!--</div>-->
+                  <!--<div class="col-sm-12 col-md-6 col-xl-4">-->
+                     <!--<div class="h-100 bg-light rounded p-4">-->
+                        <!--<div class="d-flex align-items-center justify-content-between mb-4">-->
+                           <!--<h6 class="mb-0">Calender</h6>-->
+                           <!--<a href="">Show All</a>-->
+                        <!--</div>-->
+                        <!--<div id="calender"></div>-->
+                     <!--</div>-->
+                  <!--</div>-->
+                  <!--<div class="col-sm-12 col-md-6 col-xl-4">-->
+                     <!--<div class="h-100 bg-light rounded p-4">-->
+                        <!--<div class="d-flex align-items-center justify-content-between mb-4">-->
+                           <!--<h6 class="mb-0">To Do List</h6>-->
+                           <!--<a href="">Show All</a>-->
+                        <!--</div>-->
+                        <!--<div class="d-flex mb-2">-->
+                           <!--<input class="form-control bg-transparent" type="text" placeholder="Enter task">-->
+                           <!--<button type="button" class="btn btn-primary ms-2">Add</button>-->
+                        <!--</div>-->
+                        <!--<div class="d-flex align-items-center border-bottom py-2">-->
+                           <!--<input class="form-check-input m-0" type="checkbox">-->
+                           <!--<div class="w-100 ms-3">-->
+                              <!--<div class="d-flex w-100 align-items-center justify-content-between">-->
+                                 <!--<span>Short task goes here...</span>-->
+                                 <!--<button class="btn btn-sm"><i class="fa fa-times"></i></button>-->
+                              <!--</div>-->
+                           <!--</div>-->
+                        <!--</div>-->
+                        <!--<div class="d-flex align-items-center border-bottom py-2">-->
+                           <!--<input class="form-check-input m-0" type="checkbox">-->
+                           <!--<div class="w-100 ms-3">-->
+                              <!--<div class="d-flex w-100 align-items-center justify-content-between">-->
+                                 <!--<span>Short task goes here...</span>-->
+                                 <!--<button class="btn btn-sm"><i class="fa fa-times"></i></button>-->
+                              <!--</div>-->
+                           <!--</div>-->
+                        <!--</div>-->
+                        <!--<div class="d-flex align-items-center border-bottom py-2">-->
+                           <!--<input class="form-check-input m-0" type="checkbox" checked>-->
+                           <!--<div class="w-100 ms-3">-->
+                              <!--<div class="d-flex w-100 align-items-center justify-content-between">-->
+                                 <!--<span><del>Short task goes here...</del></span>-->
+                                 <!--<button class="btn btn-sm text-primary"><i class="fa fa-times"></i></button>-->
+                              <!--</div>-->
+                           <!--</div>-->
+                        <!--</div>-->
+                        <!--<div class="d-flex align-items-center border-bottom py-2">-->
+                           <!--<input class="form-check-input m-0" type="checkbox">-->
+                           <!--<div class="w-100 ms-3">-->
+                              <!--<div class="d-flex w-100 align-items-center justify-content-between">-->
+                                 <!--<span>Short task goes here...</span>-->
+                                 <!--<button class="btn btn-sm"><i class="fa fa-times"></i></button>-->
+                              <!--</div>-->
+                           <!--</div>-->
+                        <!--</div>-->
+                        <!--<div class="d-flex align-items-center pt-2">-->
+                           <!--<input class="form-check-input m-0" type="checkbox">-->
+                           <!--<div class="w-100 ms-3">-->
+                              <!--<div class="d-flex w-100 align-items-center justify-content-between">-->
+                                 <!--<span>Short task goes here...</span>-->
+                                 <!--<button class="btn btn-sm"><i class="fa fa-times"></i></button>-->
+                              <!--</div>-->
+                           <!--</div>-->
+                        <!--</div>-->
+                     <!--</div>-->
+                  <!--</div>-->
+               <!--</div>-->
+            <!--</div>-->
+            <!--&lt;!&ndash; Widgets End &ndash;&gt;-->
+            <!--&lt;!&ndash; Footer Start &ndash;&gt;-->
+            <!--<div class="container-fluid pt-4 px-4">-->
+               <!--<div class="bg-light rounded-top p-4">-->
+                  <!--<div class="row">-->
+                     <!--<div class="col-12 col-sm-6 text-center text-sm-start">-->
+                        <!--&copy; <a href="#">Your Site Name</a>, All Right Reserved.-->
+                     <!--</div>-->
+                     <!--<div class="col-12 col-sm-6 text-center text-sm-end">-->
+                        <!--&lt;!&ndash;/*** This template is free as long as you keep the footer author’s credit link/attribution link/backlink. If you'd like to use the template without the footer author’s credit link/attribution link/backlink, you can purchase the Credit Removal License from "https://htmlcodex.com/credit-removal". Thank you for your support. ***/&ndash;&gt;-->
+                        <!--Designed By <a href="https://htmlcodex.com">HTML Codex</a>-->
+                        <!--</br>-->
+                        <!--Distributed By <a class="border-bottom" href="https://themewagon.com" target="_blank">ThemeWagon</a>-->
+                     <!--</div>-->
+                  <!--</div>-->
+               <!--</div>-->
+            <!--</div>-->
+            <!--&lt;!&ndash; Footer End &ndash;&gt;-->
+         <!--</div>-->
+         <!--&lt;!&ndash; Content End &ndash;&gt;-->
+         <!--&lt;!&ndash; Back to Top &ndash;&gt;-->
+         <!--<a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="bi bi-arrow-up"></i></a>-->
+      <!--</div>-->
+      <!--&lt;!&ndash;this index end HR&ndash;&gt;-->
+      <!--&lt;!&ndash; JavaScript Libraries &ndash;&gt;-->
+      <!--<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>-->
+      <!--<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>-->
+      <!--<script src="static/lib/chart/chart.min.js"></script>-->
+      <!--<script src="static/lib/easing/easing.min.js"></script>-->
+      <!--<script src="static/lib/waypoints/waypoints.min.js"></script>-->
+      <!--<script src="static/lib/owlcarousel/owl.carousel.min.js"></script>-->
+      <!--<script src="static/lib/tempusdominus/js/moment.min.js"></script>-->
+      <!--<script src="static/lib/tempusdominus/js/moment-timezone.min.js"></script>-->
+      <!--<script src="static/lib/tempusdominus/js/tempusdominus-bootstrap-4.min.js"></script>-->
+      <!--&lt;!&ndash; Template Javascript &ndash;&gt;-->
+      <!--<script src="static/js/main.js"></script>-->
+   <!--</body>-->
+<!--</html>-->
+<!--&lt;!&ndash; HR Template End &ndash;&gt;-->
+<!--{% elif user.is_superuser %}-->
+<!--&lt;!&ndash; Admin Template Start &ndash;&gt;-->
+
+<!--<!DOCTYPE html>-->
+
+<!--<html lang="en">-->
+   <!--<head>-->
+      <!--<meta charset="utf-8">-->
+      <!--<title>DASHMIN - Bootstrap Admin Template</title>-->
+      <!--<meta content="width=device-width, initial-scale=1.0" name="viewport">-->
+      <!--<meta content="" name="keywords">-->
+      <!--<meta content="" name="description">-->
+      <!--&lt;!&ndash; Favicon &ndash;&gt;-->
+      <!--<link href="static/img/favicon.ico" rel="icon">-->
+      <!--&lt;!&ndash; Google Web Fonts &ndash;&gt;-->
+      <!--<link rel="preconnect" href="https://fonts.googleapis.com">-->
+      <!--<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>-->
+      <!--<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700&display=swap" rel="stylesheet">-->
+      <!--&lt;!&ndash; Icon Font Stylesheet &ndash;&gt;-->
+      <!--<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">-->
+      <!--<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">-->
+      <!--&lt;!&ndash; Libraries Stylesheet &ndash;&gt;-->
+      <!--<link href="static/lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet">-->
+      <!--<link href="static/lib/tempusdominus/css/tempusdominus-bootstrap-4.min.css" rel="stylesheet" />-->
+      <!--&lt;!&ndash; Customized Bootstrap Stylesheet &ndash;&gt;-->
+      <!--<link href="static/css/bootstrap.min.css" rel="stylesheet">-->
+      <!--&lt;!&ndash; Template Stylesheet &ndash;&gt;-->
+      <!--<link href="static/css/style.css" rel="stylesheet">-->
+   <!--</head>-->
+   <!--<body>-->
+      		<!--<div class="container-xxl position-relative bg-white d-flex p-0">-->
+			<!--&lt;!&ndash; Spinner Start &ndash;&gt;-->
+			<!--&lt;!&ndash; Add your spinner content here &ndash;&gt;-->
+			<!--&lt;!&ndash; Spinner End &ndash;&gt;-->
+			<!--&lt;!&ndash; Sidebar Start &ndash;&gt;-->
+			<!--&lt;!&ndash; Add your sidebar content here &ndash;&gt;-->
+
+			<!--<div class="sidebar pe-4 pb-3">-->
+				<!--<nav class="navbar bg-light navbar-light">-->
+					<!--<a href="index" class="navbar-brand mx-4 mb-3">-->
+						<!--<h3 class="text-primary"><i class="fa fa-hashtag me-2"></i>ClothFlow</h3>-->
+					<!--</a>-->
+					<!--<div class="d-flex align-items-center ms-4 mb-4">-->
+						<!--<div class="position-relative">-->
+							<!--&lt;!&ndash;<img class="rounded-circle" src="static/img/user.jpg" alt="" style="width: 40px; height: 40px;">&ndash;&gt;-->
+							<!--{% if user.staff.profile_image %}-->
+							<!--<img class="rounded-circle me-lg-2" height="50" style="border-radius:100%" width="50" src="static{{ user.staff.profile_image.url }}" alt="Profile Image">-->
+							<!--{% else %}-->
+							<!--<img class="rounded-circle me-lg-2" src="https://bootdey.com/img/Content/avatar/avatar2.png" alt="Default Profile Image" style="width: 40px; height: 40px;">-->
+							<!--{% endif %}-->
+							<!--<div class="bg-success rounded-circle border border-2 border-white position-absolute end-0 bottom-0 p-1"></div>-->
+						<!--</div>-->
+						<!--<div class="ms-3">-->
+							<!--<h6 class="mb-0">{{user.first_name}} {{user.last_name}}</h6>-->
+							<!--&lt;!&ndash;role wise display start&ndash;&gt;-->
+							<!--<span class="d-none d-lg-inline-flex">-->
+                     <!--{% if user.is_authenticated %}-->
+                     <!--{% if user.staff.role == 1 %}-->
+                     <!--STAFF-->
+                     <!--{% elif user.staff.role == 2 %}-->
+                     <!--HR-->
+                     <!--{% endif %}-->
+                     <!--{% else %}-->
+                     <!--Welcome-->
+                     <!--{% endif %}-->
+                     <!--{% if user.is_authenticated %}-->
+                     <!--{% if user.is_superuser %}-->
+                     <!--Admin-->
+                     <!--{% endif %}-->
+                     <!--{% else %}-->
+                     <!--{% endif %}-->
+                     <!--</span>-->
+                     <!--&lt;!&ndash;role wise display end&ndash;&gt;-->
+                  <!--</div>-->
+               <!--</div>-->
+               <!--<div class="navbar-nav w-100">-->
+                  <!--<a href="index" class="nav-item nav-link active"><i class="fa fa-tachometer-alt me-2"></i>Dashboard</a>-->
+						<!--<div class="nav-item dropdown">-->
+							<!--<a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown"><i class="fa fa-laptop me-2"></i>Employees</a>-->
+							<!--<div class="dropdown-menu bg-transparent border-0">-->
+								<!--<a href="display_total_employees" class="dropdown-item">Total Employees</a>-->
+								<!--<a href="employee_details" class="dropdown-item">View Details</a>-->
+								<!--<a href="display_attendance" class="dropdown-item">Mark Attendance</a>-->
+								<!--<a href="leave_request_list_display_admin" class="dropdown-item">View Leave Request</a>-->
+
+							<!--</div>-->
+						<!--</div>-->
+
+
+						<!--<div class="nav-item dropdown">-->
+							<!--<a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown"><i class="fa fa-laptop me-2"></i>Inventory</a>-->
+							<!--<div class="dropdown-menu bg-transparent border-0">-->
+								<!--<a href="view_all_products" class="dropdown-item">Total Products</a>-->
+								<!--<a href="add_section" class="dropdown-item">Add Section</a>-->
+								<!--<a href="add_category" class="dropdown-item">Add Category</a>-->
+								<!--<a href="add_brand" class="dropdown-item">Add Brand</a>-->
+								<!--<a href="view_section" class="dropdown-item">View Section </a>-->
+								<!--<a href="view_category" class="dropdown-item">View Category </a>-->
+								<!--<a href="view_brand" class="dropdown-item">View Brand </a>-->
+
+							<!--</div>-->
+						<!--</div>-->
+
+
+                  <!--<a href="widget.html" class="nav-item nav-link"><i class="fa fa-th me-2"></i>Widgets</a>-->
+                  <!--<a href="form.html" class="nav-item nav-link"><i class="fa fa-keyboard me-2"></i>Forms</a>-->
+                  <!--<a href="table.html" class="nav-item nav-link"><i class="fa fa-table me-2"></i>Tables</a>-->
+                  <!--<a href="chart.html" class="nav-item nav-link"><i class="fa fa-chart-bar me-2"></i>Charts</a>-->
+                  <!--<div class="nav-item dropdown">-->
+                     <!--<a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown"><i class="far fa-file-alt me-2"></i>Pages</a>-->
+                     <!--<div class="dropdown-menu bg-transparent border-0">-->
+                        <!--<a href="signin" class="dropdown-item">Sign In</a>-->
+                        <!--<a href="signup" class="dropdown-item">Sign Up</a>-->
+                        <!--<a href="404.html" class="dropdown-item">404 Error</a>-->
+                        <!--<a href="blank.html" class="dropdown-item">Blank Page</a>-->
+                     <!--</div>-->
+                  <!--</div>-->
+               <!--</div>-->
+            <!--</nav>-->
+         <!--</div>-->
+         <!--&lt;!&ndash; Sidebar End &ndash;&gt;-->
+         <!--&lt;!&ndash; Content Start &ndash;&gt;-->
+         <!--<div class="content">-->
+				<!--&lt;!&ndash; Navbar Start &ndash;&gt;-->
+				<!--&lt;!&ndash; Add your navbar content here &ndash;&gt;-->
+				<!--<nav class="navbar navbar-expand bg-light navbar-light sticky-top px-4 py-0">-->
+					<!--<a href="index.html" class="navbar-brand d-flex d-lg-none me-4">-->
+						<!--<h2 class="text-primary mb-0"><i class="fa fa-hashtag"></i></h2>-->
+					<!--</a>-->
+					<!--<a href="#" class="sidebar-toggler flex-shrink-0">-->
+					<!--<i class="fa fa-bars"></i>-->
+					<!--</a>-->
+					<!--<form class="d-none d-md-flex ms-4">-->
+						<!--<input class="form-control border-0" type="search" placeholder="Search">-->
+					<!--</form>-->
+					<!--<div class="navbar-nav align-items-center ms-auto">-->
+						<!--<div class="nav-item dropdown">-->
+							<!--<a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">-->
+							<!--<i class="fa fa-envelope me-lg-2"></i>-->
+							<!--<span class="d-none d-lg-inline-flex">Message</span>-->
+							<!--</a>-->
+							<!--<div class="dropdown-menu dropdown-menu-end bg-light border-0 rounded-0 rounded-bottom m-0">-->
+								<!--<a href="#" class="dropdown-item">-->
+									<!--<div class="d-flex align-items-center">-->
+										<!--<img class="rounded-circle" src="static/img/user.jpg" alt="" style="width: 40px; height: 40px;">-->
+										<!--<div class="ms-2">-->
+											<!--<h6 class="fw-normal mb-0">Jhon send you a message</h6>-->
+											<!--<small>15 minutes ago</small>-->
+										<!--</div>-->
+									<!--</div>-->
+								<!--</a>-->
+								<!--<hr class="dropdown-divider">-->
+								<!--<a href="#" class="dropdown-item">-->
+									<!--<div class="d-flex align-items-center">-->
+										<!--<img class="rounded-circle" src="static/img/user.jpg" alt="" style="width: 40px; height: 40px;">-->
+										<!--<div class="ms-2">-->
+											<!--<h6 class="fw-normal mb-0">Jhon send you a message</h6>-->
+											<!--<small>15 minutes ago</small>-->
+										<!--</div>-->
+									<!--</div>-->
+								<!--</a>-->
+								<!--<hr class="dropdown-divider">-->
+								<!--<a href="#" class="dropdown-item">-->
+									<!--<div class="d-flex align-items-center">-->
+										<!--<img class="rounded-circle" src="static/img/user.jpg" alt="" style="width: 40px; height: 40px;">-->
+										<!--<div class="ms-2">-->
+											<!--<h6 class="fw-normal mb-0">Jhon send you a message</h6>-->
+											<!--<small>15 minutes ago</small>-->
+										<!--</div>-->
+									<!--</div>-->
+								<!--</a>-->
+								<!--<hr class="dropdown-divider">-->
+								<!--<a href="#" class="dropdown-item text-center">See all message</a>-->
+							<!--</div>-->
+						<!--</div>-->
+						<!--<div class="nav-item dropdown">-->
+							<!--<a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">-->
+							<!--<i class="fa fa-bell me-lg-2"></i>-->
+							<!--<span class="d-none d-lg-inline-flex">Notificatin</span>-->
+							<!--</a>-->
+							<!--<div class="dropdown-menu dropdown-menu-end bg-light border-0 rounded-0 rounded-bottom m-0">-->
+								<!--<a href="#" class="dropdown-item">-->
+									<!--<h6 class="fw-normal mb-0">Profile updated</h6>-->
+									<!--<small>15 minutes ago</small>-->
+								<!--</a>-->
+								<!--<hr class="dropdown-divider">-->
+								<!--<a href="#" class="dropdown-item">-->
+									<!--<h6 class="fw-normal mb-0">New user added</h6>-->
+									<!--<small>15 minutes ago</small>-->
+								<!--</a>-->
+								<!--<hr class="dropdown-divider">-->
+								<!--<a href="#" class="dropdown-item">-->
+									<!--<h6 class="fw-normal mb-0">Password changed</h6>-->
+									<!--<small>15 minutes ago</small>-->
+								<!--</a>-->
+								<!--<hr class="dropdown-divider">-->
+								<!--<a href="#" class="dropdown-item text-center">See all notifications</a>-->
+							<!--</div>-->
+						<!--</div>-->
+						<!--&lt;!&ndash;<div class="nav-item dropdown">&ndash;&gt;-->
+						<!--&lt;!&ndash;<a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">&ndash;&gt;-->
+						<!--&lt;!&ndash;<img class="rounded-circle me-lg-2" src="static/img/user.jpg" alt="" style="width: 40px; height: 40px;">&ndash;&gt;-->
+						<!--&lt;!&ndash;<span class="d-none d-lg-inline-flex">{{user.email}}sdf</span>&ndash;&gt;-->
+						<!--&lt;!&ndash;</a>&ndash;&gt;-->
+						<!--&lt;!&ndash;<div class="dropdown-menu dropdown-menu-end bg-light border-0 rounded-0 rounded-bottom m-0">&ndash;&gt;-->
+						<!--&lt;!&ndash;<a href="#" class="dropdown-item">My Profile</a>&ndash;&gt;-->
+						<!--&lt;!&ndash;<a href="signin" class="dropdown-item">Sign In</a>&ndash;&gt;-->
+						<!--&lt;!&ndash;<a href="#" class="dropdown-item">Log Out</a>&ndash;&gt;-->
+						<!--&lt;!&ndash;</div>&ndash;&gt;-->
+						<!--&lt;!&ndash;</div>&ndash;&gt;-->
+						<!--&lt;!&ndash;if else code start&ndash;&gt;-->
+						<!--<div class="nav-item dropdown">-->
+							<!--<a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">-->
+								<!--&lt;!&ndash;<img class="rounded-circle me-lg-2" src="static/img/user.jpg" alt="" style="width: 40px; height: 40px;">&ndash;&gt;-->
+								<!--{% if user.staff.profile_image %}-->
+								<!--<img class="rounded-circle me-lg-2"  style="border-radius:100% width: 40px; height: 40px;" src="static{{ user.staff.profile_image.url }}" alt="Profile Image">-->
+								<!--{% else %}-->
+								<!--<img class="rounded-circle me-lg-2" src="https://bootdey.com/img/Content/avatar/avatar2.png" alt="Default Profile Image" style="width: 40px; height: 40px;">-->
+								<!--{% endif %}-->
+								<!--<span class="d-none d-lg-inline-flex">-->
+								<!--{% if user.is_authenticated %}-->
+								<!--Hii!-->
+								<!--{{ user.first_name }}-->
+								<!--{{ user.last_name }}-->
+								<!--{% else %}-->
+								<!--Login-->
+								<!--{% endif %}-->
+								<!--</span>-->
+							<!--</a>-->
+							<!--<div class="dropdown-menu dropdown-menu-end bg-light border-0 rounded-0 rounded-bottom m-0">-->
+								<!--{% if user.is_authenticated %}-->
+								<!--&lt;!&ndash;<a href="#" class="dropdown-item">My Profile</a>&ndash;&gt;-->
+								<!--{% if not user.is_superuser %}-->
+								<!--<form id="profile-form" action="{% url 'edit_my_profile' %}" method="post">-->
+									<!--{% csrf_token %}-->
+									<!--<input type="hidden" name="staff_id" value="{{ user.staff.staff_id }}">-->
+									<!--<a href="#" class="dropdown-item" onclick="document.getElementById('profile-form').submit();">My Profile</a>-->
+								<!--</form>-->
+								<!--{% endif %}-->
+
+
+
+								<!--{% if user.is_superuser %}-->
+								<!--<a href="admin" class="dropdown-item">Admin Panel</a>-->
+								<!--<a href="signup" class="dropdown-item">Add Employees</a>-->
+								<!--{% endif %}-->
+								<!--<a href="logout_user" class="dropdown-item">Log Out</a>-->
+								<!--{% else %}-->
+								<!--&lt;!&ndash;<a href="signin" class="dropdown-item">Sign In</a>&ndash;&gt;-->
+								<!--{% endif %}-->
+							<!--</div>-->
+						<!--</div>-->
+						<!--&lt;!&ndash;if else code end &ndash;&gt;-->
+					<!--</div>-->
+				<!--</nav>-->
+				<!--&lt;!&ndash; Navbar End &ndash;&gt;-->
+            <!--&lt;!&ndash; Sale & Revenue Start &ndash;&gt;-->
+            <!--<div class="container-fluid pt-4 px-4">-->
+               <!--<div class="row g-4">-->
+                  <!--<div class="col-sm-6 col-xl-3">-->
+                     <!--<div class="bg-light rounded d-flex align-items-center justify-content-between p-4">-->
+                        <!--<i class="fa fa-chart-line fa-3x text-primary"></i>-->
+                        <!--<div class="ms-3">-->
+                           <!--<p class="mb-2">Today Sale</p>-->
+                           <!--<h6 class="mb-0">Rs. {{today_sales}}</h6>-->
+                        <!--</div>-->
+                     <!--</div>-->
+                  <!--</div>-->
+                  <!--<div class="col-sm-6 col-xl-3">-->
+                     <!--<div class="bg-light rounded d-flex align-items-center justify-content-between p-4">-->
+                        <!--<i class="fa fa-chart-bar fa-3x text-primary"></i>-->
+                        <!--<div class="ms-3">-->
+                           <!--<p class="mb-2">Total Sale</p>-->
+                           <!--<h6 class="mb-0">Rs. {{total_sales}}</h6>-->
+                        <!--</div>-->
+                     <!--</div>-->
+                  <!--</div>-->
+                  <!--<div class="col-sm-6 col-xl-3">-->
+                     <!--<div class="bg-light rounded d-flex align-items-center justify-content-between p-4">-->
+                        <!--<i class="fa fa-chart-area fa-3x text-primary"></i>-->
+                        <!--<div class="ms-3">-->
+                           <!--<p class="mb-2">Today Revenue</p>-->
+                           <!--<h6 class="mb-0">$1234</h6>-->
+                        <!--</div>-->
+                     <!--</div>-->
+                  <!--</div>-->
+                  <!--<div class="col-sm-6 col-xl-3">-->
+                     <!--<div class="bg-light rounded d-flex align-items-center justify-content-between p-4">-->
+                        <!--<i class="fa fa-chart-pie fa-3x text-primary"></i>-->
+                        <!--<div class="ms-3">-->
+                           <!--<p class="mb-2">Total Revenue</p>-->
+                           <!--<h6 class="mb-0">$1234</h6>-->
+                        <!--</div>-->
+                     <!--</div>-->
+                  <!--</div>-->
+               <!--</div>-->
+            <!--</div>-->
+            <!--&lt;!&ndash; Sale & Revenue End &ndash;&gt;-->
+            <!--&lt;!&ndash; Sales Chart Start &ndash;&gt;-->
+            <!--<div class="container-fluid pt-4 px-4">-->
+               <!--<div class="row g-4">-->
+                  <!--<div class="col-sm-12 col-xl-6">-->
+                     <!--<div class="bg-light text-center rounded p-4">-->
+                        <!--<div class="d-flex align-items-center justify-content-between mb-4">-->
+                           <!--<h6 class="mb-0">Worldwide Sales</h6>-->
+                           <!--<a href="">Show All</a>-->
+                        <!--</div>-->
+                        <!--<canvas id="worldwide-sales"></canvas>-->
+                     <!--</div>-->
+                  <!--</div>-->
+                  <!--<div class="col-sm-12 col-xl-6">-->
+                     <!--<div class="bg-light text-center rounded p-4">-->
+                        <!--<div class="d-flex align-items-center justify-content-between mb-4">-->
+                           <!--<h6 class="mb-0">Salse & Revenue</h6>-->
+                           <!--<a href="">Show All</a>-->
+                        <!--</div>-->
+                        <!--<canvas id="salse-revenue"></canvas>-->
+                     <!--</div>-->
+                  <!--</div>-->
+               <!--</div>-->
+            <!--</div>-->
+            <!--&lt;!&ndash; Sales Chart End &ndash;&gt;-->
+            <!--&lt;!&ndash; Recent Sales Start &ndash;&gt;-->
+            <!--<div class="container-fluid pt-4 px-4">-->
+               <!--<div class="bg-light text-center rounded p-4">-->
+                  <!--<div class="d-flex align-items-center justify-content-between mb-4">-->
+                     <!--<h6 class="mb-0">Recent Salse</h6>-->
+                     <!--<a href="">Show All</a>-->
+                  <!--</div>-->
+                  <!--<div class="table-responsive">-->
+                     <!--<table class="table text-start align-middle table-bordered table-hover mb-0">-->
+                        <!--<thead>-->
+                           <!--<tr class="text-dark">-->
+                              <!--<th scope="col"><input class="form-check-input" type="checkbox"></th>-->
+                              <!--<th scope="col">Date</th>-->
+                              <!--<th scope="col">Invoice</th>-->
+                              <!--<th scope="col">Customer</th>-->
+                              <!--<th scope="col">Amount</th>-->
+                              <!--<th scope="col">Status</th>-->
+                              <!--<th scope="col">Action</th>-->
+                           <!--</tr>-->
+                        <!--</thead>-->
+                        <!--<tbody>-->
+                           <!--<tr>-->
+                              <!--<td><input class="form-check-input" type="checkbox"></td>-->
+                              <!--<td>01 Jan 2045</td>-->
+                              <!--<td>INV-0123</td>-->
+                              <!--<td>Jhon Doe</td>-->
+                              <!--<td>$123</td>-->
+                              <!--<td>Paid</td>-->
+                              <!--<td><a class="btn btn-sm btn-primary" href="">Detail</a></td>-->
+                           <!--</tr>-->
+                           <!--<tr>-->
+                              <!--<td><input class="form-check-input" type="checkbox"></td>-->
+                              <!--<td>01 Jan 2045</td>-->
+                              <!--<td>INV-0123</td>-->
+                              <!--<td>Jhon Doe</td>-->
+                              <!--<td>$123</td>-->
+                              <!--<td>Paid</td>-->
+                              <!--<td><a class="btn btn-sm btn-primary" href="">Detail</a></td>-->
+                           <!--</tr>-->
+                           <!--<tr>-->
+                              <!--<td><input class="form-check-input" type="checkbox"></td>-->
+                              <!--<td>01 Jan 2045</td>-->
+                              <!--<td>INV-0123</td>-->
+                              <!--<td>Jhon Doe</td>-->
+                              <!--<td>$123</td>-->
+                              <!--<td>Paid</td>-->
+                              <!--<td><a class="btn btn-sm btn-primary" href="">Detail</a></td>-->
+                           <!--</tr>-->
+                           <!--<tr>-->
+                              <!--<td><input class="form-check-input" type="checkbox"></td>-->
+                              <!--<td>01 Jan 2045</td>-->
+                              <!--<td>INV-0123</td>-->
+                              <!--<td>Jhon Doe</td>-->
+                              <!--<td>$123</td>-->
+                              <!--<td>Paid</td>-->
+                              <!--<td><a class="btn btn-sm btn-primary" href="">Detail</a></td>-->
+                           <!--</tr>-->
+                           <!--<tr>-->
+                              <!--<td><input class="form-check-input" type="checkbox"></td>-->
+                              <!--<td>01 Jan 2045</td>-->
+                              <!--<td>INV-0123</td>-->
+                              <!--<td>Jhon Doe</td>-->
+                              <!--<td>$123</td>-->
+                              <!--<td>Paid</td>-->
+                              <!--<td><a class="btn btn-sm btn-primary" href="">Detail</a></td>-->
+                           <!--</tr>-->
+                        <!--</tbody>-->
+                     <!--</table>-->
+                  <!--</div>-->
+               <!--</div>-->
+            <!--</div>-->
+            <!--&lt;!&ndash; Recent Sales End &ndash;&gt;-->
+            <!--&lt;!&ndash; Widgets Start &ndash;&gt;-->
+            <!--<div class="container-fluid pt-4 px-4">-->
+               <!--<div class="row g-4">-->
+                  <!--<div class="col-sm-12 col-md-6 col-xl-4">-->
+                     <!--<div class="h-100 bg-light rounded p-4">-->
+                        <!--<div class="d-flex align-items-center justify-content-between mb-2">-->
+                           <!--<h6 class="mb-0">Messages</h6>-->
+                           <!--<a href="">Show All</a>-->
+                        <!--</div>-->
+                        <!--<div class="d-flex align-items-center border-bottom py-3">-->
+                           <!--<img class="rounded-circle flex-shrink-0" src="static/img/user.jpg" alt="" style="width: 40px; height: 40px;">-->
+                           <!--<div class="w-100 ms-3">-->
+                              <!--<div class="d-flex w-100 justify-content-between">-->
+                                 <!--<h6 class="mb-0">Jhon Doe</h6>-->
+                                 <!--<small>15 minutes ago</small>-->
+                              <!--</div>-->
+                              <!--<span>Short message goes here...</span>-->
+                           <!--</div>-->
+                        <!--</div>-->
+                        <!--<div class="d-flex align-items-center border-bottom py-3">-->
+                           <!--<img class="rounded-circle flex-shrink-0" src="static/img/user.jpg" alt="" style="width: 40px; height: 40px;">-->
+                           <!--<div class="w-100 ms-3">-->
+                              <!--<div class="d-flex w-100 justify-content-between">-->
+                                 <!--<h6 class="mb-0">Jhon Doe</h6>-->
+                                 <!--<small>15 minutes ago</small>-->
+                              <!--</div>-->
+                              <!--<span>Short message goes here...</span>-->
+                           <!--</div>-->
+                        <!--</div>-->
+                        <!--<div class="d-flex align-items-center border-bottom py-3">-->
+                           <!--<img class="rounded-circle flex-shrink-0" src="static/img/user.jpg" alt="" style="width: 40px; height: 40px;">-->
+                           <!--<div class="w-100 ms-3">-->
+                              <!--<div class="d-flex w-100 justify-content-between">-->
+                                 <!--<h6 class="mb-0">Jhon Doe</h6>-->
+                                 <!--<small>15 minutes ago</small>-->
+                              <!--</div>-->
+                              <!--<span>Short message goes here...</span>-->
+                           <!--</div>-->
+                        <!--</div>-->
+                        <!--<div class="d-flex align-items-center pt-3">-->
+                           <!--<img class="rounded-circle flex-shrink-0" src="img/user.jpg" alt="" style="width: 40px; height: 40px;">-->
+                           <!--<div class="w-100 ms-3">-->
+                              <!--<div class="d-flex w-100 justify-content-between">-->
+                                 <!--<h6 class="mb-0">Jhon Doe</h6>-->
+                                 <!--<small>15 minutes ago</small>-->
+                              <!--</div>-->
+                              <!--<span>Short message goes here...</span>-->
+                           <!--</div>-->
+                        <!--</div>-->
+                     <!--</div>-->
+                  <!--</div>-->
+                  <!--<div class="col-sm-12 col-md-6 col-xl-4">-->
+                     <!--<div class="h-100 bg-light rounded p-4">-->
+                        <!--<div class="d-flex align-items-center justify-content-between mb-4">-->
+                           <!--<h6 class="mb-0">Calender</h6>-->
+                           <!--<a href="">Show All</a>-->
+                        <!--</div>-->
+                        <!--<div id="calender"></div>-->
+                     <!--</div>-->
+                  <!--</div>-->
+                  <!--<div class="col-sm-12 col-md-6 col-xl-4">-->
+                     <!--<div class="h-100 bg-light rounded p-4">-->
+                        <!--<div class="d-flex align-items-center justify-content-between mb-4">-->
+                           <!--<h6 class="mb-0">To Do List</h6>-->
+                           <!--<a href="">Show All</a>-->
+                        <!--</div>-->
+                        <!--<div class="d-flex mb-2">-->
+                           <!--<input class="form-control bg-transparent" type="text" placeholder="Enter task">-->
+                           <!--<button type="button" class="btn btn-primary ms-2">Add</button>-->
+                        <!--</div>-->
+                        <!--<div class="d-flex align-items-center border-bottom py-2">-->
+                           <!--<input class="form-check-input m-0" type="checkbox">-->
+                           <!--<div class="w-100 ms-3">-->
+                              <!--<div class="d-flex w-100 align-items-center justify-content-between">-->
+                                 <!--<span>Short task goes here...</span>-->
+                                 <!--<button class="btn btn-sm"><i class="fa fa-times"></i></button>-->
+                              <!--</div>-->
+                           <!--</div>-->
+                        <!--</div>-->
+                        <!--<div class="d-flex align-items-center border-bottom py-2">-->
+                           <!--<input class="form-check-input m-0" type="checkbox">-->
+                           <!--<div class="w-100 ms-3">-->
+                              <!--<div class="d-flex w-100 align-items-center justify-content-between">-->
+                                 <!--<span>Short task goes here...</span>-->
+                                 <!--<button class="btn btn-sm"><i class="fa fa-times"></i></button>-->
+                              <!--</div>-->
+                           <!--</div>-->
+                        <!--</div>-->
+                        <!--<div class="d-flex align-items-center border-bottom py-2">-->
+                           <!--<input class="form-check-input m-0" type="checkbox" checked>-->
+                           <!--<div class="w-100 ms-3">-->
+                              <!--<div class="d-flex w-100 align-items-center justify-content-between">-->
+                                 <!--<span><del>Short task goes here...</del></span>-->
+                                 <!--<button class="btn btn-sm text-primary"><i class="fa fa-times"></i></button>-->
+                              <!--</div>-->
+                           <!--</div>-->
+                        <!--</div>-->
+                        <!--<div class="d-flex align-items-center border-bottom py-2">-->
+                           <!--<input class="form-check-input m-0" type="checkbox">-->
+                           <!--<div class="w-100 ms-3">-->
+                              <!--<div class="d-flex w-100 align-items-center justify-content-between">-->
+                                 <!--<span>Short task goes here...</span>-->
+                                 <!--<button class="btn btn-sm"><i class="fa fa-times"></i></button>-->
+                              <!--</div>-->
+                           <!--</div>-->
+                        <!--</div>-->
+                        <!--<div class="d-flex align-items-center pt-2">-->
+                           <!--<input class="form-check-input m-0" type="checkbox">-->
+                           <!--<div class="w-100 ms-3">-->
+                              <!--<div class="d-flex w-100 align-items-center justify-content-between">-->
+                                 <!--<span>Short task goes here...</span>-->
+                                 <!--<button class="btn btn-sm"><i class="fa fa-times"></i></button>-->
+                              <!--</div>-->
+                           <!--</div>-->
+                        <!--</div>-->
+                     <!--</div>-->
+                  <!--</div>-->
+               <!--</div>-->
+            <!--</div>-->
+            <!--&lt;!&ndash; Widgets End &ndash;&gt;-->
+            <!--&lt;!&ndash; Footer Start &ndash;&gt;-->
+            <!--<div class="container-fluid pt-4 px-4">-->
+               <!--<div class="bg-light rounded-top p-4">-->
+                  <!--<div class="row">-->
+                     <!--<div class="col-12 col-sm-6 text-center text-sm-start">-->
+                        <!--&copy; <a href="#">Your Site Name</a>, All Right Reserved.-->
+                     <!--</div>-->
+                     <!--<div class="col-12 col-sm-6 text-center text-sm-end">-->
+                        <!--&lt;!&ndash;/*** This template is free as long as you keep the footer author’s credit link/attribution link/backlink. If you'd like to use the template without the footer author’s credit link/attribution link/backlink, you can purchase the Credit Removal License from "https://htmlcodex.com/credit-removal". Thank you for your support. ***/&ndash;&gt;-->
+                        <!--Designed By <a href="https://htmlcodex.com">HTML Codex</a>-->
+                        <!--</br>-->
+                        <!--Distributed By <a class="border-bottom" href="https://themewagon.com" target="_blank">ThemeWagon</a>-->
+                     <!--</div>-->
+                  <!--</div>-->
+               <!--</div>-->
+            <!--</div>-->
+            <!--&lt;!&ndash; Footer End &ndash;&gt;-->
+         <!--</div>-->
+         <!--&lt;!&ndash; Content End &ndash;&gt;-->
+         <!--&lt;!&ndash; Back to Top &ndash;&gt;-->
+         <!--<a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="bi bi-arrow-up"></i></a>-->
+      <!--</div>-->
+      <!--&lt;!&ndash;this index end HR&ndash;&gt;-->
+      <!--&lt;!&ndash; JavaScript Libraries &ndash;&gt;-->
+      <!--<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>-->
+      <!--<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>-->
+      <!--<script src="static/lib/chart/chart.min.js"></script>-->
+      <!--<script src="static/lib/easing/easing.min.js"></script>-->
+      <!--<script src="static/lib/waypoints/waypoints.min.js"></script>-->
+      <!--<script src="static/lib/owlcarousel/owl.carousel.min.js"></script>-->
+      <!--<script src="static/lib/tempusdominus/js/moment.min.js"></script>-->
+      <!--<script src="static/lib/tempusdominus/js/moment-timezone.min.js"></script>-->
+      <!--<script src="static/lib/tempusdominus/js/tempusdominus-bootstrap-4.min.js"></script>-->
+      <!--&lt;!&ndash; Template Javascript &ndash;&gt;-->
+      <!--<script src="static/js/main.js"></script>-->
+   <!--</body>-->
+<!--</html>-->
+<!--&lt;!&ndash; Admin Template End &ndash;&gt;-->
+<!--{% endif %}-->
+<!--{% else %}-->
+<!--&lt;!&ndash; Default Template Start &ndash;&gt;-->
+<!--&lt;!&ndash; Add your default content here &ndash;&gt;-->
+<!--<h1>Default template in index page if user is not admin,hr,staff</h1>-->
+<!--{% endif %}-->
+
+

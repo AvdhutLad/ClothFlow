@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+
+{% block first_block %}
+<style>
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+#category-form {
+    width: 80%;
+    margin: 50px auto;
+    padding: 20px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+#category-form h2 {
+    margin-top: 0;
+    color: #009CFF; /* Updated heading color */
+}
+
+form div {
+    margin-bottom: 10px;
+}
+
+form label {
+    display: block;
+    font-weight: bold;
+    color: #009CFF; /* Updated label color */
+}
+
+form input[type="text"],
+form textarea,
+form select {
+    width: calc(100% - 16px); /* Adjusting for padding */
+    padding: 8px;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+}
+
+form textarea {
+    height: 100px;
+}
+
+form button {
+    width: 100%;
+    padding: 10px 20px;
+    background-color: #009CFF; /* Updated button color */
+    color: #fff;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+form button:hover {
+    background-color: #0077CC; /* Darker shade on hover */
+}
+</style>
+</head>
+<body>
+
+<section id="category-form">
+    <h2>Add Category</h2>
+                    <!--alert start-->
+                            {% if messages %}
+                            {% for message in messages %}
+                            <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}success{% endif %}" role="alert">
+                               <i class="fa fa-exclamation-circle me-2"></i>{{ message }}
+                            </div>
+                            {% endfor %}
+                            {% endif %}
+                            <!--alert end-->
+    <form action="store_category" method="POST" >
+        {% csrf_token %}
+        <div>
+            <label for="section-name">Section Name:</label>
+            <select id="section-name" name="section_name" required>
+                <option value="" disabled selected>Select Section</option>
+
+                {% for section_details in section_details %}
+
+
+                <option value="{{section_details.section_name }}" name="section_name">{{ section_details.section_name }}</option>
+
+                {% endfor %}
+                <!-- Options will be dynamically populated via JavaScript -->
+            </select>
+        </div>
+        <div>
+            <label for="category-name">Category Name:</label>
+            <input type="text" id="category-name" name="category_name" required>
+        </div>
+        <div>
+            <label for="category-description">Description:</label>
+            <textarea id="category-description" name="description" required></textarea>
+        </div>
+        <button type="submit">Add Category</button>
+    </form>
+</section>
+
+<script>
+
+</script>
+
+{% endblock %}

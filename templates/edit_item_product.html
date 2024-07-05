@@ -1,0 +1,192 @@
+
+{% extends 'base.html' %}
+
+{% block first_block %}
+
+    <style type="text/css">
+        body {
+            margin-top: 20px;
+            background: #f8f8f8;
+        }
+
+    </style>
+</head>
+
+<body>
+<div class="container">
+    <div class="row flex-lg-nowrap">
+        <h1>edit item product </h1>
+        <div class="col">
+            <div class="modal fade" role="dialog" tabindex="-1" id="user-form-modal">
+                <div class="modal-dialog modal-lg" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title edit_item">Edit Item</h5>
+                            <a href="view_product" type="button" class="close" style="border:1px solid black;">
+                            <span aria-hidden="true">×</span>
+                        </a>
+
+                                <style>
+                                a{
+                                padding:4px;
+                                color:black;
+                                }
+
+                                .close:focus {
+                                    outline: none;
+
+                                }
+                            </style>
+
+
+                        </div>
+                        <div class="modal-body">
+                            <div class="py-1">
+
+
+
+
+                                    <form action="save_changes_product" method="POST">
+                                        {% csrf_token %}
+
+
+                                        <input type="hidden"  name="product_id" value="{{ product_id }}">
+
+
+
+                                        <div class="row">
+                                            <div class="col">
+                                                <div class="row">
+                                                    <div class="col">
+                                                        <div class="form-group">
+                                                            <label>Product Name</label>
+                                                            <input class="form-control" type="text" name="product_name"
+                                                                placeholder="Enter Product Name" value="{{product_name}}">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col">
+                                                        <div class="form-group">
+                                                            <label>Section Name</label>
+
+                                                                <select class="form-control" id="category" name="section" required>
+                                                                    <option value="{{section_id}}">{{section_name}}</option>
+                                                                    <!-- Populate with options from database -->
+
+                                                                    {% for section_detail in section_details %}
+                                                                        <option value="{{ section_detail.section_id }}">{{ section_detail.section_name }}</option>
+                                                                    {% endfor %}
+
+                                                                </select>
+
+
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+
+
+                                                <div class="row">
+                                                    <div class="col">
+                                                        <div class="form-group">
+                                                            <label>category Name</label>
+
+                                                                <select class="form-control" id="category" name="category" required>
+                                                                    <option value="{{category_id}}">{{category_name}}</option>
+                                                                    <!-- Populate with options from database -->
+                                                                    {% for category_detail in category_details %}
+                                                                        <option value="{{ category_detail.category_id }}">{{ category_detail.category_name }}</option>
+                                                                    {% endfor %}
+                                                                </select>
+                                                        </div>
+
+                                                    </div>
+                                                    <div class="col">
+                                                        <div class="form-group">
+                                                            <label>Brand Name</label>
+
+                                                                <select class="form-control" id="category" name="brand" required>
+                                                                    <option value="{{brand_id}}">{{brand_name}}</option>
+                                                                    <!-- Populate with options from database -->
+                                                                    {% for brand_detail in brand_details %}
+                                                                        <option value="{{ brand_detail.brand_id }}">{{ brand_detail.brand_name }}</option>
+                                                                    {% endfor %}
+                                                                </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+
+                                                <div class="row">
+                                                    <div class="col">
+                                                        <div class="form-group">
+                                                            <label>Price</label>
+
+                                                            <input class="form-control" type="number" name="price" required
+                                                            placeholder="Enter Price" value="{{price}}">
+                                                        </div>
+
+                                                    </div>
+                                                    <div class="col">
+                                                        <div class="form-group">
+                                                            <label>Quantity</label>
+
+                                                            <input class="form-control" type="number" name="quantity" required
+                                                            placeholder="Enter Quantity" value="{{quantity}}">
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="row">
+                                                    <div class="col">
+                                                        <div class="form-group">
+                                                            <label>Date</label>
+
+                                                            <input class="form-control" type="date" name="purchase_date" required
+                                                            placeholder="" value="{{purchase_date}}">
+                                                        </div>
+
+                                                    </div>
+                                                    <div class="col">
+                                                        <div class="form-group">
+                                                            <label>Supplier Name</label>
+
+                                                            <input class="form-control" type="text" name="supplier_name" required
+                                                            placeholder="Enter Supplier Name" value="{{supplier_name}}">
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+
+                                                <div class="row">
+                                                    <div class="col mb-3">
+                                                        <div class="form-group">
+                                                            <label>Update Note</label>
+                                                            <textarea class="form-control" rows="5" name="update_note" required
+                                                                placeholder=""></textarea>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                        <div class="row">
+                                            <div class="col d-flex justify-content-end">
+                                                <button class="btn btn-primary" type="submit">Save Changes</button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('#user-form-modal').modal('show');
+    });
+</script>
+
+{% endblock %}

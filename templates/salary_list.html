@@ -1,0 +1,220 @@
+{% extends 'base.html' %}
+{% block first_block %}
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 0;
+    }
+    .container {
+        max-width: 1000px;
+        margin: 20px auto;
+        padding: 20px;
+        background-color: #fff;
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+        color: #009CFF;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    .search-container {
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+    }
+    .search-container label {
+        font-weight: bold;
+        margin-right: 10px;
+    }
+    .search-container input[type="date"],
+    .search-container input[type="text"],
+    .search-container select {
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 3px;
+        width: 150px; /* Reduced size of dropdowns */
+        margin-right: 10px; /* Added margin between dropdowns */
+    }
+    .search-container select {
+        width: 100px; /* Adjusted size of year dropdown */
+    }
+    .search-container .search-btn, .submit-btn {
+        border: none;
+        border-radius: 3px;
+        padding: 10px 20px;
+        cursor: pointer;
+        background-color: #009CFF;
+        color: white;
+    }
+    .search-container .search-btn:hover, .submit-btn:hover {
+        background-color: #0075b2;
+    }
+    .date {
+        font-weight: bold;
+        color: #009CFF;
+        margin-bottom: 10px;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    th, td {
+        border: 1px solid #ddd;
+        padding: 10px;
+        text-align: left;
+    }
+    th {
+        background-color: #009CFF;
+        color: #fff;
+    }
+    .salary-slip-link {
+        color: #009CFF;
+        text-decoration: none;
+    }
+    .salary-slip-link:hover {
+        text-decoration: underline;
+    }
+</style>
+</head>
+<body>
+<!--alert start-->
+{% if messages %}
+{% for message in messages %}
+                            <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}success{% endif %}" role="alert">
+                               <i class="fa fa-exclamation-circle me-2"></i>{{ message }}
+                            </div>
+                            {% endfor %}
+                            {% endif %}
+<!--alert end-->
+
+    <div class="container">
+        <h1>Salary Details</h1>
+
+        <form  action="salary_list" method="POST" >
+            {% csrf_token %}
+        <div class="search-container">
+            <label for="month">Month:</label>
+            <select id="month" name="month">
+                <option value="1">January</option>
+                <option value="2">February</option>
+                <option value="3">March</option>
+                <option value="4">April</option>
+                <option value="5">May</option>
+                <option value="6">June</option>
+                <option value="7">July</option>
+                <option value="8">August</option>
+                <option value="9">September</option>
+                <option value="10">October</option>
+                <option value="11">November</option>
+                <option value="12">December</option>
+            </select>
+
+            <label for="year">Year:</label>
+            <select id="year" name="year">
+                <option value="2020">2020</option>
+                <option value="2021">2021</option>
+                <option value="2022">2022</option>
+                <option value="2023">2023</option>
+                <option value="2024">2024</option>
+                <option value="2025">2025</option>
+                <!-- Add more years as needed -->
+            </select>
+
+            <button class="search-btn" type="submit">Search</button>
+
+
+        </div>
+        </form>
+        <div class="search-container">
+            <label for="empName">Search by Name:</label>
+            <input type="text" id="empName" name="empName" placeholder="Enter Employee Name...">
+            <button class="search-btn" onclick="searchByName()">Search</button>
+        </div>
+
+        <div class="date">
+            <span id="currentDate">{{ date }}</span>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Employee ID</th>
+                    <th>Employee Name</th>
+                    <th>Employee Role</th>
+                    <th>Total Working Hours (hrs)</th>
+                    <th>Total Amount</th>
+                    <th>Salary Slip</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Sample data, replace with actual data from your backend -->
+                {% for salary in salaries %}
+                <tr>
+                    <td>{{ salary.staff_id }}</td>
+                    <td>{{ salary.first_name }} {{ salary.last_name }}</td>
+                    {% if salary.role == 1 %}
+                    <td>STAFF</td>
+                    {% else %}
+                    <td>HR</td>
+                    {% endif %}
+
+                    <td>{{ salary.total_working_hours }}</td>
+                    <td>{{ salary.total_amount }}   ₹</td>
+
+
+
+                    <form  action="salary_slip" method="POST" >
+                        {% csrf_token %}
+                        <input type="hidden" value="{{ salary.staff_id }}" name="staff_id">
+                        <input type="hidden" value="{{ salary.account_id }}" name="account_id">
+                        <input type="hidden" value="{{ salary.attendances_id }}" name="attendances_id">
+                        <input type="hidden" value="{{ salary.first_name }}" name="first_name">
+                        <input type="hidden" value="{{ salary.last_name }}" name="last_name">
+                        <input type="hidden" value="{{ salary.total_working_hours }}" name="total_working_hours">
+                        <input type="hidden" value="{{ salary.total_amount }}" name="total_amount">
+                    <td><button type="submit" class="btn btn-outline-primary">Salary Slip</button></td>
+
+                    </form>
+                </tr>
+             {% endfor %}
+            </tbody>
+        </table>
+
+        <button class="submit-btn">Submit</button>
+    </div>
+
+    <script>
+        // JavaScript for search functionality by name
+        function searchByName() {
+            const input = document.getElementById('empName').value.toLowerCase();
+            const rows = document.querySelectorAll('tbody tr');
+
+            rows.forEach(row => {
+                const nameCell = row.querySelector('td:nth-child(2)');
+                const name = nameCell.textContent.toLowerCase();
+
+                if (name.includes(input)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+    </script>
+
+
+<script>
+    // Get current date
+    var currentDate = new Date();
+    var currentMonth = currentDate.getMonth() + 1; // JavaScript months are 0-based
+    var currentYear = currentDate.getFullYear();
+
+    // Set default selected values for month and year dropdowns
+    document.getElementById("month").value = currentMonth;
+    document.getElementById("year").value = currentYear;
+</script>
+</body>
+{% endblock %}

@@ -1,0 +1,185 @@
+
+{% extends 'base.html' %}
+
+{% block first_block %}
+
+    <style type="text/css">
+        body {
+            margin-top: 20px;
+            background: #f8f8f8;
+        }
+
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="row flex-lg-nowrap">
+
+            <div class="col">
+                <div class="e-tabs mb-3 px-3 mt-4">
+                    <ul class="nav nav-tabs">
+
+                        <li class="nav-item"><a class="nav-link active" href="#">List</a></li>
+                    </ul>
+                </div>
+                <!--alert start-->
+                    {% if messages %}
+                    {% for message in messages %}
+                    <div class="alert alert alert-success" role="alert">
+                        <i class="fa fa-exclamation-circle me-2"></i>{{ message }}
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+                <!--alert end-->
+                <div class="row flex-lg-nowrap">
+                    <div class="col mb-3">
+                        <div class="e-panel card">
+                            <div class="card-body">
+                                <div class="card-title">
+                                    <h6 class="mr-2"><span> Section List</span></h6>
+
+                                </div>
+                                <div class="e-table">
+                                    <div class="table-responsive table-lg mt-3">
+                                        <table class="table table-bordered">
+                                            <thead>
+                                                <tr>
+                                                    <th class="align-top">
+                                                        Sr.No
+                                                    </th>
+                                                    <th>Section Name</th>
+                                                    <th class="max-width">Location</th>
+                                                    <th class="sortable">Description</th>
+
+                                                    <th>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+
+                                            {% for section_details in section_details%}
+
+                                                <tr>
+
+                                                    <td class="align-middle">
+                                                        {{ forloop.counter }}
+                                                    </td>
+                                                    <td class="align-middle text-center">
+                                                        {{ section_details.section_name }}
+                                                    </td>
+                                                    <td class="text-nowrap align-middle">{{ section_details.location }}</td>
+                                                    <td class="text-nowrap align-middle"><span>{{ section_details.description }}</span></td>
+
+                                                    <td class="text-center align-middle">
+                                                        <div class="btn-group align-top">
+
+                                                            <form action="edit_section" method="POST">
+                                                                {% csrf_token %}
+                                                            <input type="hidden"  name="section_id" value="{{ section_details.section_id }}">
+                                                            <button class="btn btn-sm btn-outline-secondary"
+
+                                                                type="submit" data-toggle="modal"
+                                                                >Edit</button>
+                                                            </form>
+
+                                                            <form action="delete_alert_section" method="POST">
+                                                                {% csrf_token %}
+                                                                <input type="hidden"  name="section_id" value="{{ section_details.section_id }}">
+                                                            <button class="btn btn-sm btn-outline-secondary"
+                                                                type="submit"><i class="fa fa-trash"></i></button>
+                                                            </form>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+
+
+                                                {% endfor %}
+
+
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div class="d-flex justify-content-center">
+                                        <ul class="pagination mt-3 mb-0">
+                                            <li class="disabled page-item"><a href="#" class="page-link">‹</a></li>
+                                            <li class="active page-item"><a href="#" class="page-link">1</a></li>
+                                            <li class="page-item"><a href="#" class="page-link">2</a></li>
+                                            <li class="page-item"><a href="#" class="page-link">3</a></li>
+                                            <li class="page-item"><a href="#" class="page-link">4</a></li>
+                                            <li class="page-item"><a href="#" class="page-link">5</a></li>
+                                            <li class="page-item"><a href="#" class="page-link">›</a></li>
+                                            <li class="page-item"><a href="#" class="page-link">»</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="modal fade" role="dialog" tabindex="-1" id="user-form-modal">
+                    <div class="modal-dialog modal-lg" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title edit_item">Edit Item</h5>
+                                <button type="button" class="close" data-dismiss="modal">
+                                    <span aria-hidden="true">×</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="py-1">
+                                    <form class="form" novalidate>
+                                        <div class="row">
+                                            <div class="col">
+                                                <div class="row">
+                                                    <div class="col">
+                                                        <div class="form-group">
+                                                            <label>Section Name</label>
+                                                            <input class="form-control" type="text" name="name"
+                                                                placeholder="Enter Section Name" value="{{ section_details.section_name }}">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col">
+                                                        <div class="form-group">
+                                                            <label>Location</label>
+                                                            <input class="form-control" type="text" name="username"
+                                                                placeholder="2" value="_______">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                               
+                                                <div class="row">
+                                                    <div class="col mb-3">
+                                                        <div class="form-group">
+                                                            <label>Description</label>
+                                                            <textarea class="form-control" rows="5"
+                                                                placeholder="My Bio"></textarea>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="row">
+                                            <div class="col d-flex justify-content-end">
+                                                <button class="btn btn-primary" type="submit">Save Changes</button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.1.1/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="text/javascript">
+
+
+    </script>
+{% endblock %}

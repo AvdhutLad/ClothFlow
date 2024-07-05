@@ -1,0 +1,211 @@
+{% extends 'base.html' %}
+{% block first_block %}
+<style>
+    body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+    }
+    .container {
+    max-width: 1000px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+    color: #009CFF;
+    text-align: center;
+    margin-bottom: 20px;
+    }
+    .search-container {
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    }
+    .search-container label {
+    font-weight: bold;
+    margin-right: 10px;
+    }
+    .search-container input[type="date"],
+    .search-container input[type="text"] {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    width: 45%;
+    }
+    .search-container input[type="date"] {
+    width: 80%;
+    }
+    .search-btn, .save-btn {
+    border: none;
+    border-radius: 3px;
+    padding: 10px 20px 10px 20px;
+    cursor: pointer;
+    margin-left: 170px;
+    }
+    .search-btn {
+    background-color: #009CFF;
+    color: white;
+    }
+    .search-btn:hover {
+    background-color: #0075b2;
+    }
+    .save-btn {
+    background-color: #4CAF50;
+    color: white;
+    }
+    .save-btn:hover {
+    background-color: #45a049;
+    }
+    .date {
+    font-weight: bold;
+    color: #009CFF;
+    margin-bottom: 10px;
+    }
+    table {
+    width: 100%;
+    border-collapse: collapse;
+    }
+    th, td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+    }
+    th {
+    background-color: #009CFF;
+    color: #fff;
+    }
+    .save-btn {
+    float: right;
+    margin-left: auto;
+    }
+    .present, .absent, .invalid {
+    font-weight: bold;
+    }
+    .present {
+    color: #009CFF;
+    }
+    .absent {
+    color: #ff4500;
+    }
+    .invalid {
+    color: #dc3545;
+    }
+</style>
+</head>
+<body>
+    <div class="container">
+    <!--alert start-->
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert alert alert-success" role="alert">
+        <i class="fa fa-exclamation-circle me-2"></i>{{ message }}
+    </div>
+    {% endfor %}
+    {% endif %}
+    <!--alert end-->
+    <h1>Employee Attendance</h1>
+
+
+        <form action="download_attendance_excel" method="GET">
+            {% csrf_token %}
+        <label style="width:50px" for="month" >Month:</label>
+        <select id="month" name="month">
+            <option value="1">January</option>
+            <option value="2">February</option>
+            <option value="3">March</option>
+            <option value="4">April</option>
+            <option value="5">May</option>
+            <option value="6">June</option>
+            <option value="7">July</option>
+            <option value="8">August</option>
+            <option value="9">September</option>
+            <option value="10">October</option>
+            <option value="11">November</option>
+            <option value="12">December</option>
+        </select>
+        <button class="search-btn" type="submit">Download</button>
+
+
+            <button class="search-btn"><a href="download_attendance_excel_year"  class="btn btn-primary">Download Yearly</a></button>
+    </form>
+
+
+    <div class="container">
+        <form method="POST" action="{% url 'view_attendance' %}">
+               {% csrf_token %}
+        <div class="search-container">
+            <div>
+                <label for="date">Date:</label>
+                <input type="date" id="date" name="date"  required>
+            </div>
+
+            <div>
+                <label for="empName">Employee Name:</label>
+                <input type="text" id="empName" name="empName" placeholder="Search by name...">
+            </div>
+
+
+            <button class="search-btn" type="submit">Search</button>
+        </div>
+            </form>
+        <div class="date">
+            <span id="currentDate">{{ date }}</span>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Employee ID</th>
+                    <th>Employee Name</th>
+                    <th>Employee Role</th>
+                    <th>In Time</th>
+                    <th>Out Time</th>
+                    <th>Attendance</th>
+
+                </tr>
+            </thead>
+            <tbody>
+                {% for attendance in attendance_records %}
+                <tr>
+                    <td>{{ attendance.staff.staff_id }}</td>
+                    <td>{{ attendance.staff.first_name }} {{ attendance.staff.last_name }}</td>
+                    {% if attendance.staff.role == 1%}
+                    <td>STAFF</td>
+                    {% else %}
+                    <td>HR</td>
+                    {% endif %}
+                    <td>{{ attendance.intime }}</td>
+                    <td>{{ attendance.outtime }}</td>
+                    <td>{{ attendance.get_attendance_status_display }}</td>
+
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <script>
+        function searchByName() {
+        const input = document.getElementById('empName').value.toLowerCase();
+        const rows = document.querySelectorAll('tbody tr');
+
+        rows.forEach(row => {
+            const nameCell = row.querySelector('td:nth-child(2)');
+            const name = nameCell.textContent.toLowerCase();
+
+            if (name.includes(input)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+
+    document.getElementById('empName').addEventListener('input', searchByName);
+
+    </script>
+    </div>
+</body>
+{% endblock %}
